@@ -4,6 +4,9 @@
 #   ./install.sh                 install packages, link configs and apply the theme
 #   ./install.sh --no-packages   only link configs and apply the theme
 #   ./install.sh --lang es       interface language: en (English) or es (Español)
+#   ./install.sh --kb-layout us  keyboard layout(s), e.g. us, latam, "latam,us"
+#   ./install.sh --kb-variant intl   keyboard variant ("" for none)
+#   ./install.sh --kb-options grp:alt_shift_toggle   XKB options ("" for none)
 #   ./install.sh --theme red     initial theme (default: the saved one, or catppuccin/green)
 #   ./install.sh --dry-run       print what would be done without changing anything
 #
@@ -27,6 +30,8 @@ PACKAGES=1
 DRY_RUN=0
 THEME=""
 LANG_CHOICE=""
+KB_LAYOUT=""
+unset KB_VARIANT KB_OPTIONS   # unset = ask / use the saved value; empty = none
 
 green=$'\e[32m'; yellow=$'\e[33m'; red=$'\e[31m'; bold=$'\e[1m'; reset=$'\e[0m'
 step() { echo "${bold}${green}==>${reset}${bold} $*${reset}"; }
@@ -35,7 +40,7 @@ die()  { echo "${red}  error: $*${reset}" >&2; exit 1; }
 run()  { if (( DRY_RUN )); then echo "    [dry-run] $*"; else "$@"; fi; }
 short() { echo "${1/#$HOME/\~}"; }
 
-usage() { sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 0; }
+usage() { sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; exit 0; }
 
 while (($#)); do
     case "$1" in
@@ -43,6 +48,9 @@ while (($#)); do
         --dry-run) DRY_RUN=1 ;;
         --theme) THEME="${2:?missing theme name}"; shift ;;
         --lang) LANG_CHOICE="${2:?missing language (en|es)}"; shift ;;
+        --kb-layout) KB_LAYOUT="${2:?missing keyboard layout}"; shift ;;
+        --kb-variant) KB_VARIANT="${2?missing keyboard variant}"; shift ;;
+        --kb-options) KB_OPTIONS="${2?missing keyboard options}"; shift ;;
         -h|--help) usage ;;
         *) die "unknown option: $1 (see --help)" ;;
     esac
@@ -52,9 +60,16 @@ done
 [[ $EUID -eq 0 ]] && die "do not run the installer as root; it asks for sudo when needed"
 command -v pacman >/dev/null || die "this installer is for Arch-based distributions (pacman not found)"
 
-# --- 0. Interface language ---
-if [[ -f "$DOTS_STATE/language" ]]; then
-    default_lang="$DOTS_LANG"
+# --- 0. Preferences: interface language and keyboard layout ---
+# Stored in $DOTS_SETTINGS (outside the repo). Defaults come from the saved
+# settings, then from the system (LANG, localectl), then from plain English/us.
+interactive=0; [[ -t 0 ]] && interactive=1
+
+has_setting() { grep -q "^$1=" "$DOTS_SETTINGS" 2>/dev/null; }
+system_x11() { localectl status 2>/dev/null | sed -n "s/^ *X11 $1: //p"; }
+
+if has_setting language; then
+    default_lang=$DOTS_LANG
 elif [[ "${LANG:-}" == es* ]]; then
     default_lang=es
 else
@@ -62,7 +77,7 @@ else
 fi
 if [[ -z "$LANG_CHOICE" ]]; then
     LANG_CHOICE=$default_lang
-    if [[ -t 0 ]]; then
+    if (( interactive )); then
         [[ $default_lang == es ]] && default_num=2 || default_num=1
         echo "${bold}Interface language / Idioma de la interfaz${reset}"
         echo "  1) English"
@@ -77,9 +92,77 @@ if [[ -z "$LANG_CHOICE" ]]; then
 fi
 [[ "$LANG_CHOICE" == en || "$LANG_CHOICE" == es ]] || die "language must be 'en' or 'es'"
 DOTS_LANG=$LANG_CHOICE
-run mkdir -p "$DOTS_STATE"
-if (( DRY_RUN )); then echo "    [dry-run] echo $DOTS_LANG > $(short "$DOTS_STATE/language")"; else echo "$DOTS_LANG" >"$DOTS_STATE/language"; fi
+
+# Checks every comma-separated layout (and its variant) against xkeyboard-config.
+# Skipped when localectl cannot list layouts (e.g. inside some containers).
+valid_keyboard() { # layouts variants
+    local known i
+    known=$(localectl list-x11-keymap-layouts 2>/dev/null) || return 0
+    [[ -z "$known" ]] && return 0
+    IFS=, read -ra layouts <<<"$1"
+    IFS=, read -ra variants <<<"$2"
+    for i in "${!layouts[@]}"; do
+        grep -qx "${layouts[i]}" <<<"$known" || { warn "$(L "unknown layout" "distribución desconocida"): ${layouts[i]}"; return 1; }
+        if [[ -n "${variants[i]:-}" ]] &&
+           ! localectl list-x11-keymap-variants "${layouts[i]}" 2>/dev/null | grep -qx "${variants[i]}"; then
+            warn "$(L "unknown variant" "variante desconocida"): ${variants[i]} (${layouts[i]})"; return 1
+        fi
+    done
+}
+
+default_layout=$(dots_setting kb_layout "$(system_x11 Layout)"); default_layout=${default_layout:-us}
+if has_setting kb_variant; then default_variant=$(dots_setting kb_variant ""); else default_variant=$(system_x11 Variant); fi
+while :; do
+    layout=${KB_LAYOUT:-$default_layout}
+    # A layout given with --kb-layout does not inherit the saved variant
+    if [[ -n "$KB_LAYOUT" && "$KB_LAYOUT" != "$default_layout" ]]; then
+        variant=${KB_VARIANT-}
+    else
+        variant=${KB_VARIANT-$default_variant}
+    fi
+    if (( interactive )) && [[ -z "$KB_LAYOUT" ]]; then
+        echo "${bold}$(L "Keyboard layout" "Distribución de teclado")${reset}"
+        echo "  $(L "Examples: us, latam, es, de, fr. Several layouts: latam,us (Ctrl + Space switches)." "Ejemplos: us, latam, es, de, fr. Varias: latam,us (Ctrl + Espacio cambia entre ellas).")"
+        read -rp "  $(L "Layout" "Distribución") [$default_layout]: " answer; layout=${answer:-$default_layout}
+        if [[ -z "${KB_VARIANT+x}" ]]; then
+            # The saved variant only makes sense for the saved layout
+            [[ "$layout" == "$default_layout" ]] && suggested=$default_variant || suggested=""
+            read -rp "  $(L "Variant (optional, e.g. intl, dvorak)" "Variante (opcional, ej. intl, dvorak)") [$suggested]: " answer
+            variant=${answer:-$suggested}
+        fi
+    fi
+    valid_keyboard "$layout" "$variant" && break
+    (( interactive )) && [[ -z "$KB_LAYOUT" ]] || die "$(L "invalid keyboard layout" "distribución de teclado inválida"): $layout $variant"
+done
+
+# With more than one layout, add Ctrl + Space to switch between them unless
+# the options already have a switching key (grp:...) or were given explicitly.
+if [[ -n "${KB_OPTIONS+x}" ]]; then
+    options=$KB_OPTIONS
+else
+    options=$(dots_setting kb_options "")
+    if [[ "$layout" == *,* ]]; then
+        [[ "$options" == *grp:* ]] || options="${options:+$options,}grp:ctrl_space_toggle"
+    else
+        # A single layout has nothing to switch to; drop grp:* so Ctrl + Space reaches the apps
+        options=$(tr ',' '\n' <<<"$options" | { grep -v '^grp:' || true; } | paste -sd, -)
+    fi
+fi
+
+settings_text="# Preferences for the dotfiles, written by install.sh. You can edit them by hand;
+# run 'hyprctl reload' afterwards.
+language=$DOTS_LANG
+kb_layout=$layout
+kb_variant=$variant
+kb_options=$options"
+run mkdir -p "$(dirname "$DOTS_SETTINGS")"
+if (( DRY_RUN )); then
+    echo "    [dry-run] $(L "write" "escribir") $(short "$DOTS_SETTINGS"):"; sed 's/^/      /' <<<"$settings_text"
+else
+    echo "$settings_text" >"$DOTS_SETTINGS"
+fi
 step "$(L "Language" "Idioma"): $(L "English" "Español")"
+step "$(L "Keyboard" "Teclado"): $layout${variant:+ ($variant)}${options:+ [$options]}"
 
 read_list() { grep -vE '^\s*(#|$)' "$1" | sed 's/#.*//' | awk '{print $1}'; }
 

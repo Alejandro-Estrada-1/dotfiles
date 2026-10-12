@@ -32,7 +32,7 @@ El repo se puede clonar en cualquier carpeta. Nada depende de un nombre de carpe
 
 Lo que hace el instalador:
 
-1. Pregunta el idioma de la interfaz (inglés o español).
+1. Pregunta el idioma de la interfaz (inglés o español) y la distribución de tu teclado.
 2. Instala los paquetes de [`packages/pacman.txt`](packages/pacman.txt) y [`packages/aur.txt`](packages/aur.txt). Si no tienes `yay` ni `paru`, ofrece instalar `yay`.
 3. Mueve lo que ya tengas en `~/.config/{hypr,waybar,rofi,...}` a `~/.config/dotfiles-backup-<fecha>/`.
 4. Crea enlaces simbólicos de `~/.config/*` hacia el repo, así que **editar un archivo en `~/.config` lo edita en el repo** y git ve el cambio.
@@ -47,6 +47,9 @@ Opciones:
 ```sh
 ./install.sh --no-packages     # solo enlaces y tema
 ./install.sh --lang es         # sin preguntar: en (English) o es (Español)
+./install.sh --kb-layout latam # distribución de teclado; varias con comas: "latam,us"
+./install.sh --kb-variant intl # variante del teclado ("" para ninguna)
+./install.sh --kb-options caps:escape  # opciones de XKB ("" para ninguna)
 ./install.sh --theme anonymous # tema inicial
 ./install.sh --dry-run         # muestra lo que haría sin cambiar nada
 ```
@@ -57,19 +60,32 @@ Opciones:
 > [!NOTE]
 > Si ejecutas el instalador desde una sesión de Hyprland que todavía usa `hyprland.conf`, carga la configuración en Lua con `hyprctl reload full-reset`, o cierra sesión y vuelve a entrar.
 
-## Idioma
+## Idioma y teclado
 
-El idioma de la interfaz abarca las descripciones de los atajos, los menús de rofi (temas, atajos, menú de energía) y los mensajes del instalador y de los scripts `dots-*`. Los archivos en sí siempre están en inglés.
+El instalador guarda lo que elijas en `~/.config/dotfiles/settings`, fuera del repo, así que cada usuario conserva lo suyo:
 
-Para cambiarlo después:
-
-```sh
-./install.sh --no-packages --lang en   # o --lang es
-hyprctl reload                         # recarga las descripciones de los atajos
+```ini
+language=es
+kb_layout=latam
+kb_variant=
+kb_options=
 ```
 
+- **Idioma de la interfaz** (`en` o `es`): descripciones de los atajos, menús de rofi (temas, atajos, menú de energía) y mensajes del instalador y de los scripts `dots-*`. Los archivos en sí siempre están en inglés.
+- **Teclado**: cualquier distribución de XKB, por ejemplo `us`, `latam`, `es`, `de` o `fr`. El valor sugerido sale de tu sistema (`localectl`). Con varias distribuciones (`latam,us`), `Ctrl + Espacio` cambia entre ellas.
+
+Para cambiarlos después, vuelve a ejecutar el instalador o edita el archivo a mano:
+
+```sh
+./install.sh --no-packages --lang en --kb-layout us
+hyprctl reload
+```
+
+> [!TIP]
+> Para ver las distribuciones y variantes válidas: `localectl list-x11-keymap-layouts` y `localectl list-x11-keymap-variants <distribución>`. El instalador comprueba tu elección con esas listas.
+
 > [!NOTE]
-> Las fechas (pantalla de bloqueo, reloj de la barra) siguen el idioma de tu sistema, no esta opción.
+> La región, el formato de fecha y la zona horaria no forman parte de los dotfiles: la pantalla de bloqueo y el reloj de la barra siguen la configuración de tu sistema. Se cambian con `localectl set-locale` y `timedatectl set-timezone`.
 
 ## Temas
 
@@ -179,14 +195,14 @@ Si conectas el monitor externo con la sesión ya iniciada, recibe el fondo del t
 ├── config/                se enlaza en ~/.config/
 │   ├── hypr/
 │   │   ├── hyprland.lua   punto de entrada
-│   │   └── modules/       monitores, atajos, apariencia, entrada, autoinicio, reglas, idioma...
+│   │   └── modules/       monitores, atajos, apariencia, entrada, autoinicio, reglas, preferencias, idioma...
 │   ├── waybar/  rofi/  kitty/  fastfetch/  cava/  swaync/  nwg-look/
 ├── themes/
 │   ├── catppuccin/*.theme
 │   ├── misc/*.theme
 │   └── templates/         de aquí salen los archivos current-theme.*
 ├── scripts/               dots-theme, dots-apply-theme, dots-keybinds, dots-powermenu
-│   └── lib/common.sh      funciones compartidas (idioma)
+│   └── lib/common.sh      funciones compartidas (preferencias, idioma)
 ├── wallpapers/
 └── assets/                temas GTK y cursores hypr-dots-*
 ```

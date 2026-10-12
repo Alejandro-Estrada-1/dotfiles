@@ -32,7 +32,7 @@ The repo can be cloned anywhere. Nothing depends on a specific folder name: the 
 
 What the installer does:
 
-1. Asks for the interface language (English or Spanish).
+1. Asks for the interface language (English or Spanish) and your keyboard layout.
 2. Installs the packages in [`packages/pacman.txt`](packages/pacman.txt) and [`packages/aur.txt`](packages/aur.txt). If neither `yay` nor `paru` is installed, it offers to install `yay`.
 3. Moves anything already in `~/.config/{hypr,waybar,rofi,...}` to `~/.config/dotfiles-backup-<date>/`.
 4. Creates symlinks from `~/.config/*` to the repo, so **editing a file in `~/.config` edits it in the repo** and git sees the change.
@@ -47,6 +47,9 @@ Options:
 ```sh
 ./install.sh --no-packages     # only links and theme
 ./install.sh --lang es         # skip the question: en (English) or es (Español)
+./install.sh --kb-layout us    # keyboard layout; several with commas: "latam,us"
+./install.sh --kb-variant intl # keyboard variant ("" for none)
+./install.sh --kb-options caps:escape  # XKB options ("" for none)
 ./install.sh --theme anonymous # initial theme
 ./install.sh --dry-run         # print what it would do without changing anything
 ```
@@ -57,19 +60,32 @@ Options:
 > [!NOTE]
 > If you run the installer from inside a Hyprland session that still uses `hyprland.conf`, load the Lua configuration with `hyprctl reload full-reset`, or log out and back in.
 
-## Language
+## Language and keyboard
 
-The interface language covers the keybind descriptions, the rofi menus (themes, keybinds, power menu) and the messages of the installer and the `dots-*` scripts. The files themselves are always in English.
+The installer saves your choices in `~/.config/dotfiles/settings`, outside the repo, so every user keeps their own:
 
-To change it later:
-
-```sh
-./install.sh --no-packages --lang es   # or --lang en
-hyprctl reload                         # reload the keybind descriptions
+```ini
+language=en
+kb_layout=us
+kb_variant=
+kb_options=
 ```
 
+- **Interface language** (`en` or `es`): keybind descriptions, rofi menus (themes, keybinds, power menu) and the messages of the installer and the `dots-*` scripts. The files themselves are always in English.
+- **Keyboard**: any XKB layout, for example `us`, `latam`, `es`, `de` or `fr`. The suggested value comes from your system (`localectl`). With several layouts (`latam,us`), `Ctrl + Space` switches between them.
+
+To change them later, run the installer again or edit the file by hand:
+
+```sh
+./install.sh --no-packages --lang es --kb-layout latam
+hyprctl reload
+```
+
+> [!TIP]
+> To list the valid layouts and variants: `localectl list-x11-keymap-layouts` and `localectl list-x11-keymap-variants <layout>`. The installer checks your choice against these lists.
+
 > [!NOTE]
-> Dates (lock screen, bar clock) follow your system locale, not this setting.
+> Region, date format and time zone are not part of the dotfiles: the lock screen and the bar clock follow your system settings. Change them with `localectl set-locale` and `timedatectl set-timezone`.
 
 ## Themes
 
@@ -179,14 +195,14 @@ When the external monitor is plugged in after logging in, it gets the theme's wa
 ├── config/                linked into ~/.config/
 │   ├── hypr/
 │   │   ├── hyprland.lua   entry point
-│   │   └── modules/       monitors, keybinds, appearance, input, autostart, rules, lang...
+│   │   └── modules/       monitors, keybinds, appearance, input, autostart, rules, settings, lang...
 │   ├── waybar/  rofi/  kitty/  fastfetch/  cava/  swaync/  nwg-look/
 ├── themes/
 │   ├── catppuccin/*.theme
 │   ├── misc/*.theme
 │   └── templates/         source of the current-theme.* files
 ├── scripts/               dots-theme, dots-apply-theme, dots-keybinds, dots-powermenu
-│   └── lib/common.sh      shared helpers (language)
+│   └── lib/common.sh      shared helpers (settings, language)
 ├── wallpapers/
 └── assets/                hypr-dots-* GTK themes and cursors
 ```
