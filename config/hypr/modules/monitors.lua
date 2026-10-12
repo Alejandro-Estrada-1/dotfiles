@@ -7,8 +7,8 @@
 local laptop   = "eDP-1"
 local external = "HDMI-A-1"
 
--- Laptop panel at 240 Hz
-hl.monitor({ output = laptop,   mode = "1920x1080@240", position = "0x0",        scale = 1 })
+-- Laptop panel at the highest refresh rate it supports
+hl.monitor({ output = laptop,   mode = "highrr",        position = "0x0",        scale = 1 })
 -- External monitor to the right of the laptop, at its preferred resolution
 hl.monitor({ output = external, mode = "preferred",     position = "auto-right", scale = 1 })
 -- Any other monitor (another machine, a projector, etc.)

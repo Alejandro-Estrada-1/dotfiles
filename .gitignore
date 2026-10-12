@@ -7,3 +7,6 @@ config/kitty/current-theme.conf
 config/fastfetch/current-logo.png
 config/swaync/current-theme.css
 config/swaync/config.json
+
+# cava copies its default shaders here on start
+config/cava/shaders/

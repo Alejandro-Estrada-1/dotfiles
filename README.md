@@ -243,7 +243,7 @@ The bars next to the tray move with any sound the system plays and stay flat in 
 
 In [`config/hypr/modules/monitors.lua`](config/hypr/modules/monitors.lua):
 
-- `eDP-1` (laptop) at 1920x1080 @ 240 Hz, with workspaces 1-5.
+- `eDP-1` (laptop) at the highest refresh rate its panel supports, with workspaces 1-5.
 - `HDMI-A-1` (external) to the right, at its preferred resolution, with workspaces 6-10.
 - Any other monitor uses its preferred resolution.
 

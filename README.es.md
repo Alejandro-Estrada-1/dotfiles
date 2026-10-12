@@ -243,7 +243,7 @@ Las barras junto a la bandeja se mueven con cualquier sonido que reproduzca el s
 
 En [`config/hypr/modules/monitors.lua`](config/hypr/modules/monitors.lua):
 
-- `eDP-1` (laptop) a 1920x1080 @ 240 Hz, con los escritorios 1-5.
+- `eDP-1` (laptop) a la frecuencia más alta que soporte su pantalla, con los escritorios 1-5.
 - `HDMI-A-1` (externo) a la derecha, con su resolución preferida y los escritorios 6-10.
 - Cualquier otro monitor usa su resolución preferida.
 
