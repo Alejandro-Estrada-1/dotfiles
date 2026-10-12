@@ -39,7 +39,16 @@ noto-fonts
 papirus-icon-theme
 nwg-look
 glib2                        # gsettings
+xdg-user-dirs                # standard user folders (Documents, Downloads, ...)
+xdg-utils                    # xdg-open / xdg-mime (default applications)
 
-# Applications used by the keybinds
+# File managers: Thunar is the default (Super + E), Dolphin is also installed
+thunar
+thunar-archive-plugin        # compress / extract from the context menu
+file-roller                  # archive backend for thunar-archive-plugin
+gvfs                         # trash, removable drives and network places
+gvfs-mtp                     # phones and media players
 dolphin
+
+# Other applications used by the keybinds
 kcalc

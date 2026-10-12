@@ -16,6 +16,7 @@ It is a reinterpretation of [sansroot/hypr-dots](https://github.com/sansroot/hyp
 | Wallpapers | awww |
 | Notifications | SwayNC |
 | System info | Fastfetch |
+| File manager | Thunar (Dolphin is also installed) |
 | Shell | Zsh + Oh My Zsh + Powerlevel10k, zoxide, atuin |
 
 > [!IMPORTANT]
@@ -39,7 +40,8 @@ What the installer does:
 4. Creates symlinks from `~/.config/*` to the repo, so **editing a file in `~/.config` edits it in the repo** and git sees the change.
 5. Links the GTK themes and cursors into `~/.local/share` (no sudo needed).
 6. Sets up zsh: links `~/.zshrc`, `~/.zprofile` and `~/.p10k.zsh`, installs Oh My Zsh with Powerlevel10k and its plugins, and offers to make zsh your default shell.
-7. Applies the theme and checks the configuration with `Hyprland --verify-config`.
+7. Creates the standard user folders (Documents, Downloads, Pictures...) and makes Thunar the default file manager.
+8. Applies the theme and checks the configuration with `Hyprland --verify-config`.
 
 > [!WARNING]
 > The installer replaces `~/.config/hypr`, `waybar`, `rofi`, `kitty`, `fastfetch`, `cava`, `swaync`, `nwg-look` and `atuin`, plus `~/.zshrc`, `~/.zprofile` and `~/.p10k.zsh`, with symlinks. Your previous files are not deleted: they are moved to `~/.config/dotfiles-backup-<date>/`.
@@ -121,6 +123,15 @@ hyprctl reload
 > [!NOTE]
 > Region, date format and time zone are not part of the dotfiles: the lock screen and the bar clock follow your system settings. Change them with `localectl set-locale` and `timedatectl set-timezone`.
 
+## User folders and file manager
+
+The installer runs `xdg-user-dirs-update`, which creates the standard folders (Desktop, Documents, Downloads, Music, Pictures, Videos, Templates, Public, Projects) and records them in `~/.config/user-dirs.dirs`.
+
+> [!NOTE]
+> Folder names follow the system language, not the interface language: with `es_MX.UTF-8` they are `Documentos`, `Descargas`, `Imágenes`... and with `en_US.UTF-8`, `Documents`, `Downloads`, `Pictures`... Existing folders are never renamed. Nothing in the dotfiles assumes either name, so both work.
+
+Thunar is the default file manager (`Super + E` and every "open folder" action), with archive support (`thunar-archive-plugin` + `file-roller`) and `gvfs` for the trash, USB drives and phones. Dolphin is installed too; to use it instead, change `file_manager` in [`config/hypr/modules/programs.lua`](config/hypr/modules/programs.lua) and run `xdg-mime default org.kde.dolphin.desktop inode/directory`.
+
 ## Themes
 
 `Alt + C` opens the picker: first the family (`catppuccin` or `misc`), then the theme. The change is applied immediately to Hyprland, Waybar, Rofi, Kitty, Hyprlock, Fastfetch, GTK, the cursor and the icons.
@@ -198,7 +209,7 @@ The **KB** button on the bar shows the full list. It is read from the live confi
 | `Ctrl + Shift + 1...5` | Move window to 6-10 |
 | `Super + ,` / `Super + .` | Focus left / right monitor |
 | `Super + Shift + ,` / `.` | Move window to left / right monitor |
-| `Super + E` | File manager (Dolphin) |
+| `Super + E` | File manager (Thunar) |
 | `Super + B` | Browser (Brave) |
 | `Super + L` | Lock screen |
 | `Super + K` / `Super + J` | Close / open the bar |

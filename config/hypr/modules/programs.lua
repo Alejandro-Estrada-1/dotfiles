@@ -10,7 +10,7 @@ return {
     keybinds     = bin .. "/dots-keybinds",
     power_menu   = bin .. "/dots-powermenu",
     terminal     = "kitty",
-    file_manager = "dolphin",
+    file_manager = "thunar",
     app_menu     = "rofi -show drun",
     screenshot   = "flameshot gui -c",
     lock         = "hyprlock",

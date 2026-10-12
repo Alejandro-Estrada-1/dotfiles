@@ -320,6 +320,25 @@ else
     fi
 fi
 
+# --- 2c. User folders and default file manager ---
+step "$(L "User folders and default apps" "Carpetas de usuario y aplicaciones por defecto")"
+# Creates the standard folders (Documents, Downloads, ...) named after the system
+# language, e.g. "Documentos" with es_MX. Existing folders are never renamed.
+if command -v xdg-user-dirs-update >/dev/null; then
+    run xdg-user-dirs-update
+    if [[ -f "$CFG/user-dirs.dirs" ]]; then
+        folders=$(sed -n 's/^XDG_[A-Z]*_DIR="\$HOME\/\(.\+\)"$/\1/p' "$CFG/user-dirs.dirs" | paste -sd' ' -)
+        echo "    $(L "user folders" "carpetas de usuario"): $folders"
+    fi
+else
+    warn "$(L "xdg-user-dirs is not installed; user folders were not created" "xdg-user-dirs no está instalado; no se crearon las carpetas de usuario")"
+fi
+# Thunar opens folders by default (e.g. "show in folder" from a browser)
+if [[ -f /usr/share/applications/thunar.desktop ]] && command -v xdg-mime >/dev/null; then
+    run xdg-mime default thunar.desktop inode/directory
+    echo "    $(L "default file manager" "gestor de archivos por defecto"): Thunar"
+fi
+
 # --- 3. Initial theme ---
 step "$(L "Applying the theme" "Aplicando el tema")"
 if (( DRY_RUN )); then
