@@ -1,7 +1,10 @@
 # Catppuccin Mocha - red
-ACCENT="#f38ba8"
+# Catppuccin's own "red" (#f38ba8) looks pink, so this theme uses a true red
+# that matches the red already used by the hypr-dots-red GTK assets.
+ACCENT="#f44336"
+URGENT="#f44336"
 WALLPAPER="doom.jpg"
 LOGO="fd.png"
 GTK="hypr-dots-red"
 CURSOR="hypr-dots-red"
-FOLDERS="cat-mocha-red"
+FOLDERS="red"
