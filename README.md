@@ -17,6 +17,7 @@ It is a reinterpretation of [sansroot/hypr-dots](https://github.com/sansroot/hyp
 | Notifications | SwayNC |
 | System info | Fastfetch |
 | File manager | Thunar (Dolphin is also installed) |
+| Tray | nm-applet (network), blueman (Bluetooth) |
 | Shell | Zsh + Oh My Zsh + Powerlevel10k, zoxide, atuin |
 
 > [!IMPORTANT]
@@ -40,7 +41,7 @@ What the installer does:
 4. Creates symlinks from `~/.config/*` to the repo, so **editing a file in `~/.config` edits it in the repo** and git sees the change.
 5. Links the GTK themes and cursors into `~/.local/share` (no sudo needed).
 6. Sets up zsh: links `~/.zshrc`, `~/.zprofile` and `~/.p10k.zsh`, installs Oh My Zsh with Powerlevel10k and its plugins, and offers to make zsh your default shell.
-7. Creates the standard user folders (Documents, Downloads, Pictures...) and makes Thunar the default file manager.
+7. Creates the standard user folders (Documents, Downloads, Pictures...), makes Thunar the default file manager and enables the Bluetooth service.
 8. Applies the theme and checks the configuration with `Hyprland --verify-config`.
 
 > [!WARNING]
@@ -61,6 +62,9 @@ Options:
 
 > [!TIP]
 > Run `./install.sh --dry-run` first to see exactly which files would be moved and linked. The installer can also be run again safely; links that already exist are left alone.
+
+> [!NOTE]
+> Both login sessions work: "Hyprland" and "Hyprland (uwsm-managed)". In either one, the standard autostart entries (`/etc/xdg/autostart`) run at login, which is what puts the network and Bluetooth icons in the bar.
 
 > [!NOTE]
 > If you run the installer from inside a Hyprland session that still uses `hyprland.conf`, load the Lua configuration with `hyprctl reload full-reset`, or log out and back in.
