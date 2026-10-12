@@ -63,6 +63,24 @@ window#waybar {
     border-style: solid;
     border-color: @accent;
 }
+#custom-media {
+    margin-top: 10px;
+    margin-left: 8px;
+    padding-left: 10px;
+    padding-right: 14px;
+    margin-bottom: 0px;
+    border-radius: 10px;
+    color: @text;
+    background: @bg;
+    transition: 0.3s;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @accent;
+}
+#custom-media:hover {
+    background: @accent;
+    color: @bg;
+}
 #custom-keybinds:hover {
     background: @accent;
     color: @bg;

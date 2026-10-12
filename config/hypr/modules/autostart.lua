@@ -18,7 +18,9 @@ return function(theme)
         -- (/etc/xdg/autostart: nm-applet and blueman tray icons, among others).
         -- With the uwsm session this target is already running, so it is a no-op.
         hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
-            .. " && systemctl --user start xdg-desktop-autostart.target")
+            .. " && systemctl --user start xdg-desktop-autostart.target"
+            -- Notifications and the media control center (Waybar media button)
+            .. " && systemctl --user start swaync.service")
         hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
         hl.exec_cmd("waybar")
 

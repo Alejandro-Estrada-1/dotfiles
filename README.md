@@ -14,7 +14,7 @@ It is a reinterpretation of [sansroot/hypr-dots](https://github.com/sansroot/hyp
 | Terminal | Kitty |
 | Lock screen | Hyprlock |
 | Wallpapers | awww |
-| Notifications | SwayNC |
+| Notifications | SwayNC, also the media control center |
 | System info | Fastfetch |
 | File manager | Thunar (Dolphin is also installed) |
 | Tray | nm-applet (network), blueman (Bluetooth) |
@@ -190,7 +190,7 @@ FOLDERS="cat-mocha-green"
 4. Apply it with `dots-apply-theme mine/neon`. It also shows up in `Alt + C`.
 
 > [!CAUTION]
-> Do not edit the `current-theme.*` files or `config/hypr/hyprlock.conf` directly: they are overwritten every time the theme changes. Edit the templates in `themes/templates/` instead.
+> Do not edit the `current-theme.*` files, `config/hypr/hyprlock.conf` or `config/swaync/config.json` directly: they are overwritten every time the theme changes. Edit the templates in `themes/templates/` instead.
 
 ## Keybinds
 
@@ -221,6 +221,15 @@ The **KB** button on the bar shows the full list. It is read from the live confi
 | `Super + M` | Exit Hyprland |
 
 Keybinds live in [`config/hypr/modules/keybinds.lua`](config/hypr/modules/keybinds.lua) and programs in [`config/hypr/modules/programs.lua`](config/hypr/modules/programs.lua).
+
+## Media control center
+
+The 󰝚 button on the bar opens a small panel under it with whatever is playing: album art, title, and previous / play-pause / next buttons. Every player gets its own card (Spotify, a video in the browser, ...), so you can pause one without touching the others; switch between them with the arrows, the dots or the mouse wheel. Notifications and "Do not disturb" are listed below.
+
+The panel is the SwayNC control center ([`themes/templates/swaync-config.json`](themes/templates/swaync-config.json)). Its style builds on the one shipped with SwayNC and only swaps the colors for the active theme, so it changes along with the rest of the desktop.
+
+> [!NOTE]
+> Any app that supports MPRIS shows up: Spotify, browsers, mpv with `mpv-mpris`, and most music players. To check what the system sees, run `playerctl -l`.
 
 ## Audio visualizer
 

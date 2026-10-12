@@ -14,7 +14,7 @@ Es una reinterpretación de [sansroot/hypr-dots](https://github.com/sansroot/hyp
 | Terminal | Kitty |
 | Pantalla de bloqueo | Hyprlock |
 | Fondos | awww |
-| Notificaciones | SwayNC |
+| Notificaciones | SwayNC, también el centro de control de medios |
 | Información del sistema | Fastfetch |
 | Gestor de archivos | Thunar (también se instala Dolphin) |
 | Bandeja | nm-applet (red), blueman (Bluetooth) |
@@ -190,7 +190,7 @@ FOLDERS="cat-mocha-green"
 4. Aplícalo con `dots-apply-theme mios/neon`. También aparece en `Alt + C`.
 
 > [!CAUTION]
-> No edites a mano los archivos `current-theme.*` ni `config/hypr/hyprlock.conf`: se sobrescriben cada vez que cambias de tema. Edita las plantillas de `themes/templates/`.
+> No edites a mano los archivos `current-theme.*`, `config/hypr/hyprlock.conf` ni `config/swaync/config.json`: se sobrescriben cada vez que cambias de tema. Edita las plantillas de `themes/templates/`.
 
 ## Atajos
 
@@ -221,6 +221,15 @@ El botón **KB** de la barra muestra la lista completa. Se lee de la configuraci
 | `Super + M` | Salir de Hyprland |
 
 Los atajos están en [`config/hypr/modules/keybinds.lua`](config/hypr/modules/keybinds.lua) y los programas en [`config/hypr/modules/programs.lua`](config/hypr/modules/programs.lua).
+
+## Centro de control de medios
+
+El botón 󰝚 de la barra abre debajo un panel pequeño con lo que está sonando: carátula, título y botones de anterior, pausar/reproducir y siguiente. Cada reproductor tiene su propia tarjeta (Spotify, un video en el navegador...), así que puedes pausar uno sin afectar a los demás; cambia entre ellos con las flechas, los puntos o la rueda del mouse. Debajo aparecen las notificaciones y "No molestar".
+
+El panel es el centro de control de SwayNC ([`themes/templates/swaync-config.json`](themes/templates/swaync-config.json)). Su estilo parte del que trae SwayNC y solo cambia los colores por los del tema activo, así que cambia junto con el resto del escritorio.
+
+> [!NOTE]
+> Aparece cualquier aplicación compatible con MPRIS: Spotify, los navegadores, mpv con `mpv-mpris` y la mayoría de los reproductores de música. Para ver qué detecta el sistema, ejecuta `playerctl -l`.
 
 ## Visualizador de audio
 

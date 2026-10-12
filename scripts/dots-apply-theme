@@ -57,15 +57,27 @@ LOGO_PATH="$REPO/config/fastfetch/logos/$LOGO"
 [[ -f "$WALLPAPER_PATH" ]] || die "$(L "wallpaper not found" "no existe el fondo"): $WALLPAPER_PATH"
 [[ -f "$LOGO_PATH" ]] || die "$(L "logo not found" "no existe el logo"): $LOGO_PATH"
 
+# Interface texts used by the templates (swaync), in the language chosen in install.sh
+T_NOTIFICATIONS=$(L "Notifications" "Notificaciones")
+T_NO_NOTIFICATIONS=$(L "No notifications" "No hay notificaciones")
+T_CLEAR_ALL=$(L "Clear all" "Borrar todo")
+T_DND=$(L "Do not disturb" "No molestar")
+
 VARIABLES=(NAME ACCENT TEXT BORDER SHADOW WAYBAR_ACCENT WAYBAR_TEXT BG BG_ALT TERMINAL_BG
            LOCK_BG LOCK_INPUT_TEXT URGENT URGENT_TEXT INFO INFO_TEXT TERMINAL_COLOR0
-           TERMINAL_BRIGHT WALLPAPER_PATH CURSOR GTK)
+           TERMINAL_BRIGHT WALLPAPER_PATH CURSOR GTK
+           T_NOTIFICATIONS T_NO_NOTIFICATIONS T_CLEAR_ALL T_DND)
 
-# {{VAR}} -> value, {{VAR_HEX}} -> value without the leading '#'
+# {{VAR}} -> value, {{VAR_HEX}} -> value without the leading '#',
+# {{VAR_RGB}} -> "r, g, b" for #rrggbb colors
 SED_ARGS=()
 for v in "${VARIABLES[@]}"; do
     value=$(printf '%s' "${!v}" | sed 's/[&|\\]/\\&/g')
     SED_ARGS+=(-e "s|{{${v}}}|${value}|g" -e "s|{{${v}_HEX}}|${value#\#}|g")
+    if [[ "${!v}" =~ ^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$ ]]; then
+        rgb=$(printf '%d, %d, %d' "0x${BASH_REMATCH[1]}" "0x${BASH_REMATCH[2]}" "0x${BASH_REMATCH[3]}")
+        SED_ARGS+=(-e "s|{{${v}_RGB}}|${rgb}|g")
+    fi
 done
 
 render() { # template destination
@@ -85,6 +97,8 @@ render hyprlock.conf "$CFG/hypr/hyprlock.conf"
 render waybar.css    "$CFG/waybar/current-theme.css"
 render rofi.rasi     "$CFG/rofi/current-theme.rasi"
 render kitty.conf    "$CFG/kitty/current-theme.conf"
+render swaync.css    "$CFG/swaync/current-theme.css"
+render swaync-config.json "$CFG/swaync/config.json"
 ln -sfn "$LOGO_PATH" "$CFG/fastfetch/current-logo.png"
 
 mkdir -p "$DOTS_STATE"
@@ -116,6 +130,10 @@ if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
     hyprctl setcursor "$CURSOR" 24 >/dev/null || true
     hyprctl reload >/dev/null || true
     pkill -USR1 -x kitty 2>/dev/null || true   # kitty reloads its config on SIGUSR1
+    if pgrep -x swaync >/dev/null; then
+        swaync-client --reload-config >/dev/null 2>&1 || true
+        swaync-client --reload-css >/dev/null 2>&1 || true
+    fi
     if pgrep -x waybar >/dev/null; then
         pkill -x waybar || true
         setsid -f waybar >/dev/null 2>&1
