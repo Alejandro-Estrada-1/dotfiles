@@ -117,9 +117,11 @@
         "on-click": "~/.local/bin/dots-powermenu",
         "on-click-right": "killall rofi",
     },
+    // Short date on the bar (fits narrow screens); the full date shows on hover
     "clock": {
-        "format": "  {:L%A - %B %d, %Y - %R}",
-        "tooltip": false,
+        "format": "  {:L%a %d %b - %R}",
+        "tooltip": true,
+        "tooltip-format": "{:L%A - %B %d, %Y - %R}",
     },
     "hyprland/workspaces": {
         "format": "{icon}",
