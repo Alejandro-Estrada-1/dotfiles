@@ -20,10 +20,17 @@ zoxide                       # smarter cd
 atuin                        # shell history search
 fzf                          # fuzzy finder (zoxide's cdi)
 fastfetch
+imagemagick                  # fastfetch needs it to show the theme's logo in kitty
 cava
 flameshot
 jq                           # used by the keybind viewer
 git
+
+# Tray applets: network and Bluetooth icons in the bar
+network-manager-applet       # nm-applet (needs NetworkManager)
+blueman                      # Bluetooth manager and tray icon
+bluez
+bluez-utils
 
 # Audio, brightness and media
 pipewire

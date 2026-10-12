@@ -339,6 +339,15 @@ if [[ -f /usr/share/applications/thunar.desktop ]] && command -v xdg-mime >/dev/
     echo "    $(L "default file manager" "gestor de archivos por defecto"): Thunar"
 fi
 
+# --- 2d. System services ---
+# Bluetooth needs its system service running for blueman to find the adapter
+if systemctl list-unit-files bluetooth.service >/dev/null 2>&1 &&
+   [[ "$(systemctl is-enabled bluetooth.service 2>/dev/null)" != enabled ]]; then
+    step "$(L "Enabling the Bluetooth service" "Activando el servicio de Bluetooth")"
+    run sudo systemctl enable --now bluetooth.service ||
+        warn "$(L "could not enable bluetooth.service (no Bluetooth adapter?)" "no se pudo activar bluetooth.service (¿no hay adaptador Bluetooth?)")"
+fi
+
 # --- 3. Initial theme ---
 step "$(L "Applying the theme" "Aplicando el tema")"
 if (( DRY_RUN )); then

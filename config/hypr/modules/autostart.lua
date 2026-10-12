@@ -14,7 +14,11 @@ end
 
 return function(theme)
     hl.on("hyprland.start", function()
-        hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
+        -- Pass the session to systemd and start the standard XDG autostart entries
+        -- (/etc/xdg/autostart: nm-applet and blueman tray icons, among others).
+        -- With the uwsm session this target is already running, so it is a no-op.
+        hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP"
+            .. " && systemctl --user start xdg-desktop-autostart.target")
         hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
         hl.exec_cmd("waybar")
 
