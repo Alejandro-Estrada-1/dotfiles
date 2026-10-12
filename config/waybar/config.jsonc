@@ -48,7 +48,6 @@
         },
         "format": "{icon}  {capacity}%",
         "format-icons": ["", "", "", "", ""],
-        "max-length": 25
     },
     "keyboard-state": {
     "numlock": false,
@@ -93,6 +92,8 @@
     },
     "hyprland/language": {
         "format": "  {1}",
+        // keeps its width on narrow screens instead of shrinking to "..."
+        "min-length": 8,
         "tooltip": false,
     },
     "cpu": {

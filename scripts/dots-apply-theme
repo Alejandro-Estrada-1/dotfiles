@@ -134,10 +134,9 @@ if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
         swaync-client --reload-config >/dev/null 2>&1 || true
         swaync-client --reload-css >/dev/null 2>&1 || true
     fi
-    if pgrep -x waybar >/dev/null; then
-        pkill -x waybar || true
-        setsid -f waybar >/dev/null 2>&1
-    fi
+    # Reload instead of restarting: a new waybar process makes some tray icons
+    # (blueman) disappear until their app restarts; SIGUSR2 keeps them.
+    pkill -USR2 -x waybar 2>/dev/null || true
 fi
 
 echo "$(L "Theme applied" "Tema aplicado"): $THEME"
