@@ -197,31 +197,51 @@ step "$(L "Keyboard" "Teclado"): $layout${variant:+ ($variant)}${options:+ [$opt
 read_list() { grep -vE '^\s*(#|$)' "$1" | sed 's/#.*//' | awk '{print $1}'; }
 
 # --- 1. Packages ---
+# Only the packages that are missing are installed, so re-runs and updates
+# stay quiet and do not ask for sudo when there is nothing to do.
+missing_packages() { pacman -T "$@" 2>/dev/null || true; }
+
 if (( PACKAGES )); then
     step "$(L "Installing packages from the official repositories" "Instalando paquetes de los repositorios oficiales")"
     mapfile -t official < <(read_list "$REPO/packages/pacman.txt")
-    run sudo pacman -S --needed "${NOCONFIRM[@]}" "${official[@]}"
+    mapfile -t todo < <(missing_packages "${official[@]}")
+    if (( ${#todo[@]} == 0 )); then
+        echo "    $(L "all installed" "todos instalados")"
+    else
+        echo "    $(L "missing" "faltan"): ${todo[*]}"
+        run sudo pacman -S --needed "${NOCONFIRM[@]}" "${todo[@]}" ||
+            die "$(L "pacman could not install the packages. If it was a download error (slow or unreachable mirror), run ./install.sh again; it continues where it stopped." \
+                     "pacman no pudo instalar los paquetes. Si fue un error de descarga (espejo lento o caído), vuelve a ejecutar ./install.sh; continúa donde se quedó.")"
+    fi
 
     step "$(L "Installing AUR packages" "Instalando paquetes del AUR")"
     mapfile -t aur < <(read_list "$REPO/packages/aur.txt")
-    helper=""
-    for h in paru yay; do command -v "$h" >/dev/null && { helper=$h; break; }; done
-    if [[ -z "$helper" ]]; then
-        answer=""
-        (( ASSUME_YES )) || read -rp "  $(L "Neither paru nor yay found. Install yay from the AUR? [Y/n] " "No hay paru ni yay. ¿Instalar yay desde el AUR? [S/n] ")" answer
-        if [[ ! "$answer" =~ ^[nN] ]]; then
-            run sudo pacman -S --needed "${NOCONFIRM[@]}" base-devel git
-            tmp=$(mktemp -d)
-            run git clone https://aur.archlinux.org/yay-bin.git "$tmp/yay-bin"
-            if (( DRY_RUN )); then echo "    [dry-run] (cd $tmp/yay-bin && makepkg -si ${NOCONFIRM[*]})"; else (cd "$tmp/yay-bin" && makepkg -si "${NOCONFIRM[@]}"); fi
-            rm -rf "$tmp"
-            helper=yay
-        fi
-    fi
-    if [[ -n "$helper" ]]; then
-        run "$helper" -S --needed "${NOCONFIRM[@]}" "${aur[@]}"
+    mapfile -t todo < <(missing_packages "${aur[@]}")
+    if (( ${#todo[@]} == 0 )); then
+        echo "    $(L "all installed" "todos instalados")"
     else
-        warn "$(L "skipped AUR packages" "se omitieron los paquetes del AUR"): ${aur[*]}"
+        echo "    $(L "missing" "faltan"): ${todo[*]}"
+        helper=""
+        for h in paru yay; do command -v "$h" >/dev/null && { helper=$h; break; }; done
+        if [[ -z "$helper" ]]; then
+            answer=""
+            (( ASSUME_YES )) || read -rp "  $(L "Neither paru nor yay found. Install yay from the AUR? [Y/n] " "No hay paru ni yay. ¿Instalar yay desde el AUR? [S/n] ")" answer
+            if [[ ! "$answer" =~ ^[nN] ]]; then
+                run sudo pacman -S --needed "${NOCONFIRM[@]}" base-devel git
+                tmp=$(mktemp -d)
+                run git clone https://aur.archlinux.org/yay-bin.git "$tmp/yay-bin"
+                if (( DRY_RUN )); then echo "    [dry-run] (cd $tmp/yay-bin && makepkg -si ${NOCONFIRM[*]})"; else (cd "$tmp/yay-bin" && makepkg -si "${NOCONFIRM[@]}"); fi
+                rm -rf "$tmp"
+                helper=yay
+            fi
+        fi
+        if [[ -n "$helper" ]]; then
+            run "$helper" -S --needed "${NOCONFIRM[@]}" "${todo[@]}" ||
+                warn "$(L "some AUR packages failed; the rest of the installation continues. Retry later with: $helper -S ${todo[*]}" \
+                          "fallaron algunos paquetes del AUR; el resto de la instalación continúa. Reinténtalo después con: $helper -S ${todo[*]}")"
+        else
+            warn "$(L "skipped AUR packages" "se omitieron los paquetes del AUR"): ${todo[*]}"
+        fi
     fi
 else
     step "$(L "Skipping package installation (--no-packages)" "Omitiendo la instalación de paquetes (--no-packages)")"
