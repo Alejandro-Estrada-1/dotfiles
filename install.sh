@@ -26,7 +26,7 @@ BACKUP="$CFG/dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
 
 CONFIGS=(hypr waybar rofi kitty fastfetch cava swaync nwg-look atuin)
 HOME_FILES=(.zshrc .zprofile .p10k.zsh)
-SCRIPTS=(dots-theme dots-apply-theme dots-keybinds dots-powermenu dots-update)
+SCRIPTS=(dots-theme dots-apply-theme dots-keybinds dots-powermenu dots-update dots-cava)
 
 # Zsh framework, theme and plugins (cloned with git, like a manual Oh My Zsh install)
 OMZ_DIR="$HOME/.oh-my-zsh"

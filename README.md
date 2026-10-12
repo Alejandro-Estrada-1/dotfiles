@@ -9,7 +9,7 @@ It is a reinterpretation of [sansroot/hypr-dots](https://github.com/sansroot/hyp
 | Component | Program |
 | --- | --- |
 | Compositor | [Hyprland](https://hypr.land) (Lua configuration) |
-| Bar | Waybar |
+| Bar | Waybar, with a cava audio visualizer |
 | Launcher and menus | Rofi |
 | Terminal | Kitty |
 | Lock screen | Hyprlock |
@@ -222,6 +222,13 @@ The **KB** button on the bar shows the full list. It is read from the live confi
 
 Keybinds live in [`config/hypr/modules/keybinds.lua`](config/hypr/modules/keybinds.lua) and programs in [`config/hypr/modules/programs.lua`](config/hypr/modules/programs.lua).
 
+## Audio visualizer
+
+The bars next to the tray move with any sound the system plays and stay flat in silence. They come from [`scripts/dots-cava`](scripts/dots-cava), which runs `cava` and turns its output into the `▁▂▃▄▅▆▇█` characters of the `custom/cava` Waybar module.
+
+> [!NOTE]
+> Waybar's built-in `cava` module only exists in the AUR `waybar-cava` build, which conflicts with the official `waybar` package; accepting that conflict on an update removes the visualizer. This setup uses the official package plus the script, so updates cannot break it.
+
 ## Monitors
 
 In [`config/hypr/modules/monitors.lua`](config/hypr/modules/monitors.lua):
@@ -251,7 +258,7 @@ When the external monitor is plugged in after logging in, it gets the theme's wa
 │   ├── catppuccin/*.theme
 │   ├── misc/*.theme
 │   └── templates/         source of the current-theme.* files
-├── scripts/               dots-theme, dots-apply-theme, dots-keybinds, dots-powermenu, dots-update
+├── scripts/               dots-theme, dots-apply-theme, dots-keybinds, dots-powermenu, dots-update, dots-cava
 │   └── lib/common.sh      shared helpers (settings, language)
 ├── wallpapers/
 └── assets/                hypr-dots-* GTK themes and cursors

@@ -9,7 +9,7 @@ Es una reinterpretación de [sansroot/hypr-dots](https://github.com/sansroot/hyp
 | Componente | Programa |
 | --- | --- |
 | Compositor | [Hyprland](https://hypr.land) (configuración en Lua) |
-| Barra | Waybar |
+| Barra | Waybar, con un visualizador de audio de cava |
 | Lanzador y menús | Rofi |
 | Terminal | Kitty |
 | Pantalla de bloqueo | Hyprlock |
@@ -222,6 +222,13 @@ El botón **KB** de la barra muestra la lista completa. Se lee de la configuraci
 
 Los atajos están en [`config/hypr/modules/keybinds.lua`](config/hypr/modules/keybinds.lua) y los programas en [`config/hypr/modules/programs.lua`](config/hypr/modules/programs.lua).
 
+## Visualizador de audio
+
+Las barras junto a la bandeja se mueven con cualquier sonido que reproduzca el sistema y se quedan planas en silencio. Las genera [`scripts/dots-cava`](scripts/dots-cava), que ejecuta `cava` y convierte su salida en los caracteres `▁▂▃▄▅▆▇█` del módulo `custom/cava` de Waybar.
+
+> [!NOTE]
+> El módulo `cava` integrado de Waybar solo existe en la versión `waybar-cava` del AUR, que choca con el paquete oficial `waybar`; aceptar ese conflicto en una actualización elimina el visualizador. Esta configuración usa el paquete oficial más el script, así que las actualizaciones no pueden romperlo.
+
 ## Monitores
 
 En [`config/hypr/modules/monitors.lua`](config/hypr/modules/monitors.lua):
@@ -251,7 +258,7 @@ Si conectas el monitor externo con la sesión ya iniciada, recibe el fondo del t
 │   ├── catppuccin/*.theme
 │   ├── misc/*.theme
 │   └── templates/         de aquí salen los archivos current-theme.*
-├── scripts/               dots-theme, dots-apply-theme, dots-keybinds, dots-powermenu, dots-update
+├── scripts/               dots-theme, dots-apply-theme, dots-keybinds, dots-powermenu, dots-update, dots-cava
 │   └── lib/common.sh      funciones compartidas (preferencias, idioma)
 ├── wallpapers/
 └── assets/                temas GTK y cursores hypr-dots-*
