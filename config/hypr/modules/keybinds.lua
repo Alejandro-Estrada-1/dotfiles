@@ -24,6 +24,7 @@ bind("SUPER + E",      run(p.file_manager), L("Open file manager", "Abrir gestor
 bind("ALT + X",        run(p.app_menu),     L("Open application menu", "Abrir menú de aplicaciones"))
 bind("ALT + Z",        run(p.power_menu),   L("Open power menu", "Abrir menú de energía"))
 bind("SUPER + B",      run(p.browser),      L("Open browser", "Abrir navegador"))
+bind("SUPER + N",      run(p.media_panel),  L("Media and notifications panel", "Panel de medios y notificaciones"))
 bind("XF86Calculator", run(p.calculator),   L("Open calculator", "Abrir calculadora"))
 bind("Print",          run(p.screenshot),   L("Take a screenshot", "Captura de pantalla"))
 bind("SUPER + L",      run(p.lock),         L("Lock screen", "Bloquear pantalla"))

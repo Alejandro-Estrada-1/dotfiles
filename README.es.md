@@ -215,6 +215,7 @@ El botón **KB** de la barra muestra la lista completa. Se lee de la configuraci
 | `Super + Shift + ,` / `.` | Mover ventana al monitor izquierdo / derecho |
 | `Super + E` | Gestor de archivos (Thunar) |
 | `Super + B` | Navegador (Brave) |
+| `Super + N` | Panel de medios y notificaciones |
 | `Super + L` | Bloquear pantalla |
 | `Super + K` / `Super + J` | Cerrar / abrir la barra |
 | `Impr Pant` | Captura de pantalla (Flameshot) |
@@ -224,7 +225,7 @@ Los atajos están en [`config/hypr/modules/keybinds.lua`](config/hypr/modules/ke
 
 ## Centro de control de medios
 
-El botón 󰝚 de la barra abre debajo un panel pequeño con lo que está sonando: carátula, título y botones de anterior, pausar/reproducir y siguiente. Cada reproductor tiene su propia tarjeta (Spotify, un video en el navegador...), así que puedes pausar uno sin afectar a los demás; cambia entre ellos con las flechas, los puntos o la rueda del mouse. Debajo aparecen las notificaciones y "No molestar".
+El botón 󰝚 de la barra (o `Super + N`) abre debajo un panel pequeño con lo que está sonando: carátula, título y botones de anterior, pausar/reproducir y siguiente. Cada reproductor tiene su propia tarjeta (Spotify, un video en el navegador...), así que puedes pausar uno sin afectar a los demás; cambia entre ellos con las flechas, los puntos o la rueda del mouse. Debajo aparecen las notificaciones y "No molestar".
 
 El panel es el centro de control de SwayNC ([`themes/templates/swaync-config.json`](themes/templates/swaync-config.json)). Su estilo parte del que trae SwayNC y solo cambia los colores por los del tema activo, así que cambia junto con el resto del escritorio.
 

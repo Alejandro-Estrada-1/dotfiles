@@ -215,6 +215,7 @@ The **KB** button on the bar shows the full list. It is read from the live confi
 | `Super + Shift + ,` / `.` | Move window to left / right monitor |
 | `Super + E` | File manager (Thunar) |
 | `Super + B` | Browser (Brave) |
+| `Super + N` | Media and notifications panel |
 | `Super + L` | Lock screen |
 | `Super + K` / `Super + J` | Close / open the bar |
 | `Print` | Screenshot (Flameshot) |
@@ -224,7 +225,7 @@ Keybinds live in [`config/hypr/modules/keybinds.lua`](config/hypr/modules/keybin
 
 ## Media control center
 
-The 󰝚 button on the bar opens a small panel under it with whatever is playing: album art, title, and previous / play-pause / next buttons. Every player gets its own card (Spotify, a video in the browser, ...), so you can pause one without touching the others; switch between them with the arrows, the dots or the mouse wheel. Notifications and "Do not disturb" are listed below.
+The 󰝚 button on the bar (or `Super + N`) opens a small panel under it with whatever is playing: album art, title, and previous / play-pause / next buttons. Every player gets its own card (Spotify, a video in the browser, ...), so you can pause one without touching the others; switch between them with the arrows, the dots or the mouse wheel. Notifications and "Do not disturb" are listed below.
 
 The panel is the SwayNC control center ([`themes/templates/swaync-config.json`](themes/templates/swaync-config.json)). Its style builds on the one shipped with SwayNC and only swaps the colors for the active theme, so it changes along with the rest of the desktop.
 

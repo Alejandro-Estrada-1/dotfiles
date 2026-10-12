@@ -9,6 +9,7 @@ return {
     theme_picker = bin .. "/dots-theme",
     keybinds     = bin .. "/dots-keybinds",
     power_menu   = bin .. "/dots-powermenu",
+    media_panel  = "swaync-client -t -sw",
     terminal     = "kitty",
     file_manager = "thunar",
     app_menu     = "rofi -show drun",
