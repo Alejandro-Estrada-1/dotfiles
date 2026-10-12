@@ -1,0 +1,8 @@
+/* Generado por dots-aplicar-tema ({{NOMBRE}}). No editar: se sobrescribe al cambiar de tema. */
+@define-color acento         {{WAYBAR_ACENTO}};
+@define-color texto          {{WAYBAR_TEXTO}};
+@define-color fondo          {{FONDO}};
+@define-color urgente        {{URGENTE}};
+@define-color urgente_texto  {{URGENTE_TEXTO}};
+@define-color info           {{INFO}};
+@define-color info_texto     {{INFO_TEXTO}};

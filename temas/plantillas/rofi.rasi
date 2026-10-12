@@ -1,0 +1,9 @@
+/* Generado por dots-aplicar-tema ({{NOMBRE}}). No editar: se sobrescribe al cambiar de tema. */
+* {
+    background:     {{FONDO}};
+    background-alt: {{FONDO_ALT}};
+    foreground:     {{TEXTO}};
+    selected:       {{ACENTO}};
+    active:         {{ACENTO}};
+    urgent:         {{ACENTO}};
+}

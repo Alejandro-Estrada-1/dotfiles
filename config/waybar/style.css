@@ -1,0 +1,408 @@
+/* Colores del tema activo (generado por dots-aplicar-tema) */
+@import "tema-actual.css";
+
+* {
+	border: none;
+	border-radius: 10;
+    font-family: "JetbrainsMono Nerd Font" ;
+	font-size: 15px;
+	min-height: 10px;
+}
+window#waybar {
+	background: transparent;
+}
+#keyboard-state{
+    margin-top: 10px;
+    margin-left: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 0px;
+    border-radius: 10px;
+    background: @fondo;
+    color: @texto;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @acento;
+    transition: 0.3s;
+}
+#keyboard-state:hover{
+    color: @fondo;
+    background: @acento;
+}
+#network {
+    margin-top: 10px;
+    margin-left: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 0px;
+    border-radius: 10px;
+    transition: none;
+    background: @fondo;
+    color: @texto;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @acento;
+    transition: 0.3s;
+}
+#network:hover {
+    color: @fondo;
+    background: @acento;
+}
+#custom-keybinds {
+    margin-top: 10px;
+    margin-left: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 0px;
+    border-radius: 10px;
+    transition: none;
+    color: @texto;
+    background: @fondo;
+    transition: 0.3s;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @acento;
+}
+#custom-keybinds:hover {
+    background: @acento;
+    color: @fondo;
+}
+#cava{
+    margin-top: 10px;
+    margin-left: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 0px;
+    border-radius: 10px;
+    transition: none;
+    background: @fondo;
+    color: @texto;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @acento;
+    transition: 0.3s;
+}
+#cava:hover{
+    color: @fondo;
+    background: @acento;
+}
+#battery{
+    margin-top: 10px;
+    margin-left: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 0px;
+    border-radius: 10px;
+    transition: none;
+    background: @fondo;
+    color: @texto;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @acento;
+    transition: 0.3s;
+}
+#battery:hover{
+    color: @fondo;
+    background: @acento;
+}
+#backlight:hover{
+    color: @fondo;
+    background: @acento;
+}
+#backlight{
+    margin-top: 10px;
+    margin-left: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 0px;
+    border-radius: 10px;
+    transition: none;
+    background: @fondo;
+    color: @texto;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @acento;
+    transition: 0.3s;
+}
+
+#language{
+    margin-top: 10px;
+    margin-left: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 0px;
+    border-radius: 10px;
+    transition: none;
+    background: @fondo;
+    color: @texto;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @acento;
+    transition: 0.3s;
+}
+#language:hover{
+    color: @fondo;
+    background: @acento;
+}
+#pulseaudio {
+    margin-top: 10px;
+    margin-left: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 0px;
+    border-radius: 10px;
+    transition: none;
+    background: @fondo;
+    color: @texto;
+    padding: 8px;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @acento;
+    transition: 0.3s;
+}
+#pulseaudio:hover{
+    background: @acento;
+    color: @fondo;
+}
+#pulseaudio.muted {
+    color: @urgente_texto;
+    background: @fondo;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @urgente;
+    transition: 0.3s;
+}
+#pulseaudio.muted:hover {
+    background: @urgente;
+    color: @fondo;
+
+}
+#clock {
+    margin-top: 10px;
+    margin-left: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 0px;
+    border-radius: 10px;
+    transition: none;
+    background: @fondo;
+    color: @texto;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @acento;
+    transition: 0.3s;
+}
+#clock:hover {
+    color: @fondo;
+    background: @acento;
+}
+#disk{
+    margin-top: 10px;
+    margin-left: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 0px;
+    border-radius: 10px;
+    transition: none;
+    background: @fondo;
+    color: @texto;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @acento;
+    transition: 0.3s;
+}
+#disk:hover{
+    color: @fondo;
+    background: @acento;
+}
+#privacy{
+    margin-top: 10px;
+    margin-left: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 0px;
+    border-radius: 10px;
+    transition: none;
+    background: @fondo;
+    color: @texto;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @acento;
+    transition: 0.3s;
+}
+#idle_inhibitor{
+    margin-top: 10px;
+    margin-left: 8px;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-bottom: 0px;
+    border-radius: 10px;
+    transition: none;
+    background: @fondo;
+    color: @texto;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @acento;
+    transition: 0.3s;
+}
+#idle_inhibitor.activated{
+    color: @info_texto;
+    border-color: @info;
+}
+#idle_inhibitor.activated:hover{
+    background: @info;
+    color: @fondo;
+    border-color: @info;
+}
+#idle_inhibitor.deactivated{
+    color: @texto
+}
+#idle_inhibitor.deactivated:hover{
+    color: @fondo;
+    background: @acento;
+}
+#memory {
+    margin-top: 10px;
+    margin-left: 8px;
+    padding-left: 10px;
+    margin-bottom: 0px;
+    padding-right: 10px;
+    border-radius: 10px;
+    transition: none;
+    background: @fondo;
+    color: @texto;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @acento;
+    transition: 0.3s;
+}
+#memory:hover {
+    color: @fondo;
+    background: @acento;
+
+}
+#cpu {
+    margin-top: 10px;
+    margin-left: 8px;
+    padding-left: 10px;
+    margin-bottom: 0px;
+    padding-right: 10px;
+    border-radius: 10px;
+    transition: none;
+    background: @fondo;
+    color: @texto;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @acento;
+    transition: 0.3s;
+}
+#cpu:hover {
+    color: @fondo;
+    background: @acento;
+
+}
+#custom-launcher {
+    font-size: 20px;
+    margin-top: 10px;
+    margin-left: 17px;
+    padding-left: 10px;
+    padding-right: 5px;
+    border-radius: 10px;
+    transition: none;
+    color: @texto;
+    background: @fondo;
+    transition: 0.3s;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @acento;
+}
+#custom-launcher:hover {
+    background: @acento;
+    color: @fondo;
+}
+#network.disconnected {
+    color: @urgente_texto;
+    background: @fondo;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @urgente;
+}
+#network.disconnected:hover {
+    background: @urgente;
+    color: @fondo;
+}
+#custom-power {
+    font-size: 15px;
+    margin-top: 10px;
+    margin-left: 8px;
+    margin-right: 17px;
+    padding-left: 10px;
+    padding-right: 5px;
+    margin-bottom: 0px;
+    border-radius: 10px;
+    transition: none;
+    background: @fondo;
+    color: @texto;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @acento;
+    transition: 0.3s;
+}
+#custom-power:hover {
+
+    background: @urgente;
+    color: @fondo;
+    border-color: @urgente;
+
+}
+#workspaces {
+    margin-top: 10px;
+    margin-left: 8px;
+    padding-right: 4px;
+    background: @fondo;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @acento;
+    color: @texto;
+    transition: 0.3s;
+}
+#workspaces button {
+    color: @texto;
+    transition: 0.3s;
+}
+#workspaces button:hover {
+    background: transparent;
+    color: transparent;
+    box-shadow: none;
+    text-shadow: none;
+}
+#tray{
+    margin-top: 10px;
+    margin-left: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 0px;
+    border-radius: 10px;
+    transition: none;
+    background: @fondo;
+    color: @texto;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @acento;
+    transition: 0.3s;
+}
+#tray menu{
+    margin-top: 10px;
+    margin-left: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 0px;
+    border-radius: 10px;
+    transition: none;
+    background: @fondo;
+    color: @texto;
+    border-bottom: 3px;
+    border-style: solid;
+    border-color: @acento;
+    transition: 0.3s;
+}

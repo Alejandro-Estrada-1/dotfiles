@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Selector de temas con rofi: primero la familia, luego el tema.
+set -euo pipefail
+
+REPO="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+RASI="$REPO/scripts/rofi/selector.rasi"
+
+if pgrep -x rofi >/dev/null; then
+    pkill -x rofi
+    exit 0
+fi
+
+familia=$(find "$REPO/temas" -mindepth 1 -maxdepth 1 -type d ! -name plantillas -printf '%f\n' | sort |
+    rofi -dmenu -p "PALETA" -theme "$RASI") || exit 0
+[[ -z "$familia" ]] && exit 0
+
+tema=$(find "$REPO/temas/$familia" -name '*.tema' -printf '%f\n' | sed 's/\.tema$//' | sort |
+    rofi -dmenu -p "TEMA" -theme "$RASI") || exit 0
+[[ -z "$tema" ]] && exit 0
+
+exec "$REPO/scripts/dots-aplicar-tema" "$familia/$tema"

@@ -1,0 +1,32 @@
+* {
+    font-family: "JetbrainsMono Nerd Font";
+    font-size: 14px;
+    border-radius: 10px;
+}
+
+.notification {
+    background: #222330;
+    color: #F1F1F1;
+    border: 1px solid #1A1B26;
+    padding: 10px;
+}
+
+.notification.critical {
+    background: #E8A2AF;
+    color: #161320;
+}
+
+.notification.low {
+    background: #161320;
+    color: #B5E8E6;
+}
+
+.control-center {
+    background: #1A1B26;
+    padding: 8px;
+}
+
+.control-center .widget-title {
+    color: #7dcfff;
+}
+
