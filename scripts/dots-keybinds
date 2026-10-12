@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Shows the Hyprland keybinds with their description.
+# The list comes from the live configuration (hyprctl binds), so it always
+# matches config/hypr/modules/keybinds.lua.
+set -euo pipefail
+
+REPO="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+# shellcheck source=lib/common.sh
+source "$REPO/scripts/lib/common.sh"
+
+if pgrep -x rofi >/dev/null; then
+    pkill -x rofi
+    exit 0
+fi
+
+key_names=$(jq -n \
+    --arg left "$(L "Left click" "Clic izquierdo")" \
+    --arg right "$(L "Right click" "Clic derecho")" \
+    --arg down "$(L "Scroll down" "Rueda abajo")" \
+    --arg up "$(L "Scroll up" "Rueda arriba")" \
+    --arg print "$(L "Print Screen" "Impr Pant")" \
+    '{ "mouse:272": $left, "mouse:273": $right, "mouse_down": $down, "mouse_up": $up,
+       "Return": "Enter", "comma": ",", "period": ".", "Print": $print }')
+
+hyprctl binds -j | jq -r --argjson names "$key_names" '
+    def mods:
+        [ (if .modmask / 64 | floor % 2 == 1 then "Super" else empty end),
+          (if .modmask / 4  | floor % 2 == 1 then "Ctrl"  else empty end),
+          (if .modmask / 8  | floor % 2 == 1 then "Alt"   else empty end),
+          (if .modmask      | floor % 2 == 1 then "Shift" else empty end) ];
+    .[] | select(.has_description)
+        | [.description, ((mods + [$names[.key] // .key]) | join(" + "))] | @tsv' |
+    awk -F'\t' '{ printf "%-40s %s\n", $1, $2 }' |
+    rofi -dmenu -i -p "$(L "Keybinds" "Atajos")" -theme "$REPO/scripts/rofi/keybinds.rasi" >/dev/null || true

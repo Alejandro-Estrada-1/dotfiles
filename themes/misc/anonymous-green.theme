@@ -1,0 +1,12 @@
+# Anonymous - terminal green
+ACCENT="#00ff66"
+INFO="#00ff66"
+BG="#00210d"
+BG_ALT="#013d18"
+TERMINAL_BG="#00210d"
+LOCK_BG="#00210d"
+WALLPAPER="drdoom.jpg"
+LOGO="fdrd.png"
+GTK="hypr-dots-anonymous-green"
+CURSOR="hypr-dots-anonymous"
+FOLDERS="black"

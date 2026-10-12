@@ -1,0 +1,41 @@
+# Packages from the official repositories (core/extra).
+# One package per line; anything after # is ignored.
+
+# Desktop
+hyprland                     # >= 0.55 (Lua configuration)
+hyprlock
+xdg-desktop-portal-hyprland
+waybar
+rofi
+awww                         # wallpapers (successor of swww)
+swaync                       # notifications
+polkit-gnome
+qt5-wayland
+qt6-wayland
+
+# Terminal and utilities
+kitty
+fastfetch
+cava
+flameshot
+jq                           # used by the keybind viewer
+git
+
+# Audio, brightness and media
+pipewire
+pipewire-pulse
+wireplumber
+alsa-utils
+brightnessctl
+playerctl
+
+# Appearance
+ttf-jetbrains-mono-nerd
+noto-fonts
+papirus-icon-theme
+nwg-look
+glib2                        # gsettings
+
+# Applications used by the keybinds
+dolphin
+kcalc

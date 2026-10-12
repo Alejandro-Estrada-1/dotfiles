@@ -1,0 +1,21 @@
+-------------------
+---- PROGRAMS ----
+-------------------
+-- Change the programs used by the keybinds here.
+
+local bin = os.getenv("HOME") .. "/.local/bin"
+
+return {
+    theme_picker = bin .. "/dots-theme",
+    keybinds     = bin .. "/dots-keybinds",
+    power_menu   = bin .. "/dots-powermenu",
+    terminal     = "kitty",
+    file_manager = "dolphin",
+    app_menu     = "rofi -show drun",
+    screenshot   = "flameshot gui -c",
+    lock         = "hyprlock",
+    close_bar    = "killall waybar",
+    open_bar     = "waybar",
+    browser      = "brave",
+    calculator   = "kcalc",
+}

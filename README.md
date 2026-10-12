@@ -1,175 +1,219 @@
-# dotfiles · Hyprland en español
+# dotfiles - Hyprland
 
-Mi configuración de Hyprland para Arch Linux (y derivadas), con 14 temas intercambiables al vuelo.
+**English** | [Español](README.es.md)
 
-Es una reinterpretación de [sansroot/hypr-dots](https://github.com/sansroot/hypr-dots), adaptada al español y con cambios propios: soporte para monitor externo, fondos de pantalla nuevos, configuración de Hyprland migrada a **Lua** (lista para Hyprland 0.57, donde desaparece el formato `.conf`) y un sistema de temas basado en paletas en lugar de copias completas de cada archivo.
+My Hyprland setup for Arch Linux and Arch-based distributions, with 14 themes you can switch on the fly and an interface available in English or Spanish.
 
-| Componente | Programa |
+It is a reinterpretation of [sansroot/hypr-dots](https://github.com/sansroot/hypr-dots) with my own changes: external monitor support, new wallpapers, a Hyprland configuration migrated to **Lua**, a bilingual interface and a palette-based theme system instead of full copies of every config file per theme.
+
+| Component | Program |
 | --- | --- |
-| Compositor | [Hyprland](https://hypr.land) ≥ 0.55 (configuración en Lua) |
-| Barra | Waybar |
-| Lanzador y menús | Rofi |
+| Compositor | [Hyprland](https://hypr.land) (Lua configuration) |
+| Bar | Waybar |
+| Launcher and menus | Rofi |
 | Terminal | Kitty |
-| Bloqueo | Hyprlock |
-| Fondos | awww |
-| Notificaciones | SwayNC |
-| Info del sistema | Fastfetch |
+| Lock screen | Hyprlock |
+| Wallpapers | awww |
+| Notifications | SwayNC |
+| System info | Fastfetch |
 
-## Instalación
+> [!IMPORTANT]
+> This configuration requires **Hyprland 0.55 or newer**, because it uses `hyprland.lua` instead of `hyprland.conf`. The old format is deprecated since 0.55 and removed in 0.57.
+
+## Installation
 
 ```sh
-git clone https://github.com/<tu-usuario>/dotfiles.git ~/dotfiles
-cd ~/dotfiles
-./instalar.sh
+git clone https://github.com/Alejandro-Estrada-1/dotfiles.git
+cd dotfiles
+./install.sh
 ```
 
-El instalador:
+The repo can be cloned anywhere. Nothing depends on a specific folder name: the scripts find the repo from their own location, and everything else uses `$HOME` and the XDG variables.
 
-1. Instala los paquetes de [`paquetes/pacman.txt`](paquetes/pacman.txt) y [`paquetes/aur.txt`](paquetes/aur.txt). Si no tienes `yay` ni `paru`, ofrece instalar `yay`.
-2. Mueve lo que ya tengas en `~/.config/{hypr,waybar,rofi,…}` a `~/.config/dotfiles-respaldo-<fecha>/`.
-3. Crea enlaces simbólicos de `~/.config/*` hacia el repo, así que **lo que edites en `~/.config` se edita en el repo** y git lo ve.
-4. Enlaza los temas GTK y cursores en `~/.local/share` (no necesita sudo).
-5. Aplica el tema y valida la configuración con `Hyprland --verify-config`.
+What the installer does:
 
-Opciones:
+1. Asks for the interface language (English or Spanish).
+2. Installs the packages in [`packages/pacman.txt`](packages/pacman.txt) and [`packages/aur.txt`](packages/aur.txt). If neither `yay` nor `paru` is installed, it offers to install `yay`.
+3. Moves anything already in `~/.config/{hypr,waybar,rofi,...}` to `~/.config/dotfiles-backup-<date>/`.
+4. Creates symlinks from `~/.config/*` to the repo, so **editing a file in `~/.config` edits it in the repo** and git sees the change.
+5. Links the GTK themes and cursors into `~/.local/share` (no sudo needed).
+6. Applies the theme and checks the configuration with `Hyprland --verify-config`.
+
+> [!WARNING]
+> The installer replaces `~/.config/hypr`, `waybar`, `rofi`, `kitty`, `fastfetch`, `cava`, `swaync` and `nwg-look` with symlinks. Your previous files are not deleted: they are moved to `~/.config/dotfiles-backup-<date>/`.
+
+Options:
 
 ```sh
-./instalar.sh --sin-paquetes     # solo enlaces y tema
-./instalar.sh --tema anonymous   # tema inicial
-./instalar.sh --simular          # muestra lo que haría, sin cambiar nada
+./install.sh --no-packages     # only links and theme
+./install.sh --lang es         # skip the question: en (English) or es (Español)
+./install.sh --theme anonymous # initial theme
+./install.sh --dry-run         # print what it would do without changing anything
 ```
 
-Se puede ejecutar varias veces sin problema. Si ya estás dentro de Hyprland, después de instalar ejecuta `hyprctl reload full-reset` (o cierra sesión) para pasar del formato `.conf` a Lua.
+> [!TIP]
+> Run `./install.sh --dry-run` first to see exactly which files would be moved and linked. The installer can also be run again safely; links that already exist are left alone.
 
-## Temas
+> [!NOTE]
+> If you run the installer from inside a Hyprland session that still uses `hyprland.conf`, load the Lua configuration with `hyprctl reload full-reset`, or log out and back in.
 
-`Alt + C` abre el selector: primero eliges la familia (`catppuccin` o `misc`) y luego el tema. El cambio se aplica al instante en Hyprland, Waybar, Rofi, Kitty, Hyprlock, Fastfetch, GTK, cursor e iconos.
+## Language
 
-Desde la terminal:
+The interface language covers the keybind descriptions, the rofi menus (themes, keybinds, power menu) and the messages of the installer and the `dots-*` scripts. The files themselves are always in English.
+
+To change it later:
 
 ```sh
-dots-aplicar-tema --lista
-dots-aplicar-tema red
-dots-aplicar-tema misc/anonymous-blue
+./install.sh --no-packages --lang es   # or --lang en
+hyprctl reload                         # reload the keybind descriptions
+```
+
+> [!NOTE]
+> Dates (lock screen, bar clock) follow your system locale, not this setting.
+
+## Themes
+
+`Alt + C` opens the picker: first the family (`catppuccin` or `misc`), then the theme. The change is applied immediately to Hyprland, Waybar, Rofi, Kitty, Hyprlock, Fastfetch, GTK, the cursor and the icons.
+
+From a terminal:
+
+```sh
+dots-apply-theme --list
+dots-apply-theme red
+dots-apply-theme misc/anonymous-blue
 ```
 
 | catppuccin | misc |
 | --- | --- |
 | blue, green, lavender, mauve, peach, pink, red, sapphire, yellow | anonymous, anonymous-blue, anonymous-green, anonymous-red, black |
 
-### Cómo funciona
+### How it works
 
-Cada tema es un archivo pequeño en `temas/<familia>/<nombre>.tema` con sus colores, fondo, logo, tema GTK y cursor. Por ejemplo, [`temas/catppuccin/green.tema`](temas/catppuccin/green.tema):
+Each theme is a small file at `themes/<family>/<name>.theme` with its colors, wallpaper, logo, GTK theme and cursor. For example, [`themes/catppuccin/green.theme`](themes/catppuccin/green.theme):
 
 ```sh
-ACENTO="#a6e3a1"
-FONDO_PANTALLA="totoro.jpg"
+ACCENT="#a6e3a1"
+WALLPAPER="totoro.jpg"
 LOGO="ft.png"
 GTK="hypr-dots-green"
 CURSOR="hypr-dots-green"
-CARPETAS="cat-mocha-green"
+FOLDERS="cat-mocha-green"
 ```
 
-`dots-aplicar-tema` rellena las plantillas de `temas/plantillas/` con esos valores y genera los archivos `tema-actual.*` que leen los programas. Esos archivos generados están en `.gitignore`. La configuración de cada programa (atajos, módulos de la barra, etc.) existe **una sola vez**.
+`dots-apply-theme` fills the templates in `themes/templates/` with those values and writes the `current-theme.*` files that each program reads. The generated files are listed in `.gitignore`. Each program's own configuration (keybinds, bar modules, etc.) exists **only once**.
 
-### Crear un tema nuevo
+### Creating a theme
 
-1. Pon tu fondo en `fondos/` y, si quieres, un logo en `config/fastfetch/logos/`.
-2. Copia un `.tema` existente, por ejemplo `temas/catppuccin/green.tema` → `temas/mios/neon.tema`.
-3. Cambia los valores. Solo `ACENTO`, `FONDO_PANTALLA`, `LOGO`, `GTK` y `CURSOR` son obligatorios; el resto toma un valor por defecto:
+1. Put your wallpaper in `wallpapers/` and, optionally, a logo in `config/fastfetch/logos/`.
+2. Copy an existing theme, for example `themes/catppuccin/green.theme` to `themes/mine/neon.theme`.
+3. Edit the values. Only `ACCENT`, `WALLPAPER`, `LOGO`, `GTK` and `CURSOR` are required; everything else has a default:
 
-| Variable | Para qué sirve | Por defecto |
+| Variable | Used for | Default |
 | --- | --- | --- |
-| `TEXTO` | Texto de barra, terminal y hyprlock | `ACENTO` |
-| `BORDE` / `SOMBRA` | Borde y sombra de la ventana activa | `ACENTO` |
-| `FONDO` / `FONDO_ALT` | Fondo de los módulos de la barra y de rofi | `#1e1d2f` / `#282839` |
-| `FONDO_TERMINAL` | Fondo de kitty | `#1e1e2e` |
-| `BLOQUEO_FONDO` | Interior del campo de contraseña | `#1e1e2e` |
-| `URGENTE`, `INFO` | Estados de la barra (silenciado, sin red, inhibidor) | `#f38ba8`, `#89b4fa` |
-| `WAYBAR_ACENTO`, `WAYBAR_TEXTO` | Para que la barra use otro color | `ACENTO`, `TEXTO` |
-| `CARPETAS` | Color de carpetas de Papirus (`papirus-folders -l`) | — |
+| `TEXT` | Text in the bar, terminal and lock screen | `ACCENT` |
+| `BORDER` / `SHADOW` | Border and shadow of the active window | `ACCENT` |
+| `BG` / `BG_ALT` | Background of bar modules and rofi | `#1e1d2f` / `#282839` |
+| `TERMINAL_BG` | Kitty background | `#1e1e2e` |
+| `LOCK_BG` | Inside of the password field | `#1e1e2e` |
+| `LOCK_INPUT_TEXT` | Password field text | `TEXT` |
+| `URGENT`, `INFO` | Bar states (muted, disconnected, idle inhibitor) | `#f38ba8`, `#89b4fa` |
+| `URGENT_TEXT`, `INFO_TEXT` | Text for those states | `URGENT`, `INFO` |
+| `WAYBAR_ACCENT`, `WAYBAR_TEXT` | A different color just for the bar | `ACCENT`, `TEXT` |
+| `TERMINAL_COLOR0`, `TERMINAL_BRIGHT` | Terminal colors 0/8 and 9/10 | `#cdd6f4`, `TEXT` |
+| `FOLDERS` | Papirus folder color (`papirus-folders -l`) | none |
 
-4. Aplica con `dots-aplicar-tema mios/neon`. Aparecerá también en `Alt + C`.
+4. Apply it with `dots-apply-theme mine/neon`. It also shows up in `Alt + C`.
 
-## Atajos
+> [!CAUTION]
+> Do not edit the `current-theme.*` files or `config/hypr/hyprlock.conf` directly: they are overwritten every time the theme changes. Edit the templates in `themes/templates/` instead.
 
-El botón **KB** de la barra muestra la lista completa. Sale directamente de la configuración, así que siempre está al día.
+## Keybinds
 
-| Atajo | Acción |
+The **KB** button on the bar shows the full list. It is read from the live configuration, so it is always up to date.
+
+| Keybind | Action |
 | --- | --- |
 | `Alt + Enter` | Terminal |
-| `Alt + X` | Menú de aplicaciones |
-| `Alt + Z` | Menú de energía |
-| `Alt + C` | Cambiar tema |
-| `Alt + Q` | Cerrar ventana |
-| `Alt + F` | Ventana flotante |
-| `Alt + S` | Alternar división |
-| `Super + F` | Pantalla completa |
-| `Super + W/A/S/D` | Mover el foco |
-| `Alt + 1…5` | Escritorios 1–5 (laptop) |
-| `Ctrl + 1…5` | Escritorios 6–10 (monitor externo) |
-| `Super + 1…5` | Mover ventana a 1–5 |
-| `Ctrl + Shift + 1…5` | Mover ventana a 6–10 |
-| `Super + ,` / `Super + .` | Foco al monitor izquierdo / derecho |
-| `Super + Shift + ,` / `.` | Mover ventana al monitor izquierdo / derecho |
-| `Super + E` | Archivos (Dolphin) |
-| `Super + B` | Navegador (Brave) |
-| `Super + L` | Bloquear pantalla |
-| `Super + K` / `Super + J` | Cerrar / abrir la barra |
-| `Impr Pant` | Captura (Flameshot) |
-| `Super + M` | Salir de Hyprland |
+| `Alt + X` | Application menu |
+| `Alt + Z` | Power menu |
+| `Alt + C` | Change theme |
+| `Alt + Q` | Close window |
+| `Alt + F` | Toggle floating |
+| `Alt + S` | Toggle split |
+| `Super + F` | Fullscreen |
+| `Super + W/A/S/D` | Move focus |
+| `Alt + 1...5` | Workspaces 1-5 (laptop) |
+| `Ctrl + 1...5` | Workspaces 6-10 (external monitor) |
+| `Super + 1...5` | Move window to 1-5 |
+| `Ctrl + Shift + 1...5` | Move window to 6-10 |
+| `Super + ,` / `Super + .` | Focus left / right monitor |
+| `Super + Shift + ,` / `.` | Move window to left / right monitor |
+| `Super + E` | File manager (Dolphin) |
+| `Super + B` | Browser (Brave) |
+| `Super + L` | Lock screen |
+| `Super + K` / `Super + J` | Close / open the bar |
+| `Print` | Screenshot (Flameshot) |
+| `Super + M` | Exit Hyprland |
 
-## Monitores
+Keybinds live in [`config/hypr/modules/keybinds.lua`](config/hypr/modules/keybinds.lua) and programs in [`config/hypr/modules/programs.lua`](config/hypr/modules/programs.lua).
 
-En [`config/hypr/modulos/monitores.lua`](config/hypr/modulos/monitores.lua):
+## Monitors
 
-- `eDP-1` (laptop) a 1920x1080 @ 240 Hz, con los escritorios 1–5.
-- `HDMI-A-1` (externo) a la derecha, con su resolución preferida y los escritorios 6–10.
-- Cualquier otro monitor usa su resolución preferida.
+In [`config/hypr/modules/monitors.lua`](config/hypr/modules/monitors.lua):
 
-Si conectas el monitor externo con la sesión ya iniciada, recibe el fondo del tema automáticamente.
+- `eDP-1` (laptop) at 1920x1080 @ 240 Hz, with workspaces 1-5.
+- `HDMI-A-1` (external) to the right, at its preferred resolution, with workspaces 6-10.
+- Any other monitor uses its preferred resolution.
 
-En otra máquina, cambia `laptop` y `externo` por los nombres que muestre `hyprctl monitors all`.
+When the external monitor is plugged in after logging in, it gets the theme's wallpaper automatically.
 
-## Estructura
+> [!IMPORTANT]
+> Output names depend on the hardware. On another machine, run `hyprctl monitors all` and change the `laptop` and `external` variables at the top of `monitors.lua`.
+
+## Structure
 
 ```
 .
-├── instalar.sh
-├── paquetes/              pacman.txt y aur.txt
-├── config/                se enlaza a ~/.config/
+├── install.sh
+├── packages/              pacman.txt and aur.txt
+├── config/                linked into ~/.config/
 │   ├── hypr/
-│   │   ├── hyprland.lua   punto de entrada
-│   │   └── modulos/       monitores, atajos, apariencia, entrada, autoinicio, reglas…
+│   │   ├── hyprland.lua   entry point
+│   │   └── modules/       monitors, keybinds, appearance, input, autostart, rules, lang...
 │   ├── waybar/  rofi/  kitty/  fastfetch/  cava/  swaync/  nwg-look/
-├── temas/
-│   ├── catppuccin/*.tema
-│   ├── misc/*.tema
-│   └── plantillas/        de aquí salen los archivos tema-actual.*
-├── scripts/               dots-tema, dots-aplicar-tema, dots-atajos (se enlazan en ~/.local/bin)
-├── fondos/
-└── assets/                temas GTK y cursores hypr-dots-*
+├── themes/
+│   ├── catppuccin/*.theme
+│   ├── misc/*.theme
+│   └── templates/         source of the current-theme.* files
+├── scripts/               dots-theme, dots-apply-theme, dots-keybinds, dots-powermenu
+│   └── lib/common.sh      shared helpers (language)
+├── wallpapers/
+└── assets/                hypr-dots-* GTK themes and cursors
 ```
 
-## Sobre la migración a Lua
+## About the Lua migration
 
-Desde Hyprland 0.55 el formato `hyprland.conf` (hyprlang) está obsoleto, y en 0.57 se elimina. Este repo ya usa `hyprland.lua`. Lo que cambia en la práctica:
+Since Hyprland 0.55 the `hyprland.conf` format (hyprlang) is deprecated, and 0.57 removes it. This repo already uses `hyprland.lua`. In practice:
 
-- `hyprctl keyword` deja de funcionar.
-- `hyprctl dispatch` ahora recibe código Lua. Por ejemplo, `hyprctl dispatch 'hl.dsp.exit()'` en lugar de `hyprctl dispatch exit`.
-- Hyprland elige el formato **al iniciar**. Para pasar de uno a otro sin cerrar sesión: `hyprctl reload full-reset`.
-- Hyprlock sigue usando su formato propio (`hyprlock.conf`).
-- Para comprobar la configuración sin arrancar Hyprland: `Hyprland --verify-config -c ~/.config/hypr/hyprland.lua`.
+- `hyprctl dispatch` now takes Lua code: `hyprctl dispatch 'hl.dsp.exit()'` instead of `hyprctl dispatch exit`.
+- Hyprland picks the format **at startup**. To switch without logging out: `hyprctl reload full-reset`.
+- Hyprlock keeps its own format (`hyprlock.conf`).
+- To check the configuration without starting Hyprland: `Hyprland --verify-config -c ~/.config/hypr/hyprland.lua`.
 
-Documentación: <https://wiki.hypr.land/Configuring/Start/>
+> [!CAUTION]
+> `hyprctl keyword` no longer works with a Lua configuration. Scripts that rely on it have to be rewritten.
 
-## Desinstalar
+Documentation: <https://wiki.hypr.land/Configuring/Start/>
 
-Borra los enlaces (`~/.config/{hypr,waybar,rofi,kitty,fastfetch,cava,swaync,nwg-look}`, `~/.local/bin/dots-*`, `~/.local/share/{themes,icons}/hypr-dots-*`) y mueve de vuelta lo que quieras de `~/.config/dotfiles-respaldo-<fecha>/`.
+## Uninstalling
 
-## Créditos
+Remove the symlinks (`~/.config/{hypr,waybar,rofi,kitty,fastfetch,cava,swaync,nwg-look}`, `~/.local/bin/dots-*`, `~/.local/share/{themes,icons}/hypr-dots-*`) and move back whatever you want from `~/.config/dotfiles-backup-<date>/`.
 
-- [sansroot/hypr-dots](https://github.com/sansroot/hypr-dots): diseño original, temas GTK y cursores `hypr-dots-*`.
-- [adi1090x/rofi](https://github.com/adi1090x/rofi): base del menú de energía.
-- [Catppuccin](https://github.com/catppuccin): paleta de colores (MIT).
-- Los fondos de pantalla y logos pertenecen a sus respectivos autores.
+## Credits
+
+- [sansroot/hypr-dots](https://github.com/sansroot/hypr-dots): original design, `hypr-dots-*` GTK themes and cursors.
+- [adi1090x/rofi](https://github.com/adi1090x/rofi): base of the power menu.
+- [Catppuccin](https://github.com/catppuccin): color palette (MIT).
+
+> [!NOTE]
+> Wallpapers and logos belong to their respective authors.

@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Rofi theme picker: first the family, then the theme.
+set -euo pipefail
+
+REPO="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+# shellcheck source=lib/common.sh
+source "$REPO/scripts/lib/common.sh"
+RASI="$REPO/scripts/rofi/selector.rasi"
+
+if pgrep -x rofi >/dev/null; then
+    pkill -x rofi
+    exit 0
+fi
+
+family=$(find "$REPO/themes" -mindepth 1 -maxdepth 1 -type d ! -name templates -printf '%f\n' | sort |
+    rofi -dmenu -p "$(L "PALETTE" "PALETA")" -theme "$RASI") || exit 0
+[[ -z "$family" ]] && exit 0
+
+theme=$(find "$REPO/themes/$family" -name '*.theme' -printf '%f\n' | sed 's/\.theme$//' | sort |
+    rofi -dmenu -p "$(L "THEME" "TEMA")" -theme "$RASI") || exit 0
+[[ -z "$theme" ]] && exit 0
+
+exec "$REPO/scripts/dots-apply-theme" "$family/$theme"

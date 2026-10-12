@@ -2,7 +2,7 @@
     width: 600;
     font: "JetBrainsMono Nerd Font 14";
 }
-@import                          "./tema-actual.rasi"
+@import                          "./current-theme.rasi"
 element-text, element-icon, mode-switcher {
     background-color: inherit;
     text-color: inherit;

@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+# Applies a theme: renders every program's color files from
+# themes/<family>/<name>.theme + themes/templates/, and applies it live when
+# a Hyprland session is running.
+#
+# Usage: dots-apply-theme <name>           (e.g. green, anonymous-red)
+#        dots-apply-theme <family>/<name>  (e.g. catppuccin/green)
+#        dots-apply-theme --current        (re-applies the saved theme)
+#        dots-apply-theme --list
+set -euo pipefail
+
+REPO="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+# shellcheck source=lib/common.sh
+source "$REPO/scripts/lib/common.sh"
+
+CFG="$DOTS_CONFIG"
+STATE_FILE="$DOTS_STATE/theme"
+DEFAULT_THEME="catppuccin/green"
+
+die() { echo "dots-apply-theme: $*" >&2; exit 1; }
+
+list_themes() {
+    find "$REPO/themes" -mindepth 2 -maxdepth 2 -name '*.theme' -printf '%P\n' |
+        sed 's/\.theme$//' | sort
+}
+
+case "${1:-}" in
+    --list) list_themes; exit 0 ;;
+    --current) THEME="$(cat "$STATE_FILE" 2>/dev/null || echo "$DEFAULT_THEME")" ;;
+    "") die "$(L "missing theme name (use --list to see them)" "falta el nombre del tema (usa --list para verlos)")" ;;
+    *) THEME="$1" ;;
+esac
+
+# Accept "green" as well as "catppuccin/green"
+if [[ "$THEME" != */* ]]; then
+    matches=$(list_themes | grep -E "/${THEME}\$" || true)
+    [[ -z "$matches" ]] && die "$(L "theme not found" "no existe el tema"): $THEME"
+    [[ $(wc -l <<<"$matches") -gt 1 ]] && die "$(L "ambiguous name" "nombre ambiguo"): $(tr '\n' ' ' <<<"$matches")"
+    THEME="$matches"
+fi
+THEME_FILE="$REPO/themes/$THEME.theme"
+[[ -f "$THEME_FILE" ]] || die "$(L "file not found" "no existe el archivo"): $THEME_FILE"
+
+# --- Palette: defaults (Catppuccin Mocha), then the theme's own values ---
+BG="#1e1d2f"; BG_ALT="#282839"; TERMINAL_BG="#1e1e2e"; LOCK_BG="#1e1e2e"
+URGENT="#f38ba8"; INFO="#89b4fa"; TERMINAL_COLOR0="#cdd6f4"
+# shellcheck source=/dev/null
+source "$THEME_FILE"
+: "${ACCENT:?}" "${WALLPAPER:?}" "${LOGO:?}" "${GTK:?}" "${CURSOR:?}"
+: "${TEXT:=$ACCENT}" "${BORDER:=$ACCENT}" "${SHADOW:=$ACCENT}"
+: "${WAYBAR_ACCENT:=$ACCENT}" "${WAYBAR_TEXT:=$TEXT}"
+: "${URGENT_TEXT:=$URGENT}" "${INFO_TEXT:=$INFO}"
+: "${LOCK_INPUT_TEXT:=$TEXT}" "${TERMINAL_BRIGHT:=$TEXT}" "${FOLDERS:=}"
+NAME="$THEME"
+WALLPAPER_PATH="$REPO/wallpapers/$WALLPAPER"
+LOGO_PATH="$REPO/config/fastfetch/logos/$LOGO"
+[[ -f "$WALLPAPER_PATH" ]] || die "$(L "wallpaper not found" "no existe el fondo"): $WALLPAPER_PATH"
+[[ -f "$LOGO_PATH" ]] || die "$(L "logo not found" "no existe el logo"): $LOGO_PATH"
+
+VARIABLES=(NAME ACCENT TEXT BORDER SHADOW WAYBAR_ACCENT WAYBAR_TEXT BG BG_ALT TERMINAL_BG
+           LOCK_BG LOCK_INPUT_TEXT URGENT URGENT_TEXT INFO INFO_TEXT TERMINAL_COLOR0
+           TERMINAL_BRIGHT WALLPAPER_PATH CURSOR GTK)
+
+# {{VAR}} -> value, {{VAR_HEX}} -> value without the leading '#'
+SED_ARGS=()
+for v in "${VARIABLES[@]}"; do
+    value=$(printf '%s' "${!v}" | sed 's/[&|\\]/\\&/g')
+    SED_ARGS+=(-e "s|{{${v}}}|${value}|g" -e "s|{{${v}_HEX}}|${value#\#}|g")
+done
+
+render() { # template destination
+    local tmp
+    mkdir -p "$(dirname "$2")"
+    tmp=$(mktemp "$2.XXXXXX")
+    sed "${SED_ARGS[@]}" "$REPO/themes/templates/$1" >"$tmp"
+    if grep -q '{{' "$tmp"; then
+        rm -f "$tmp"; die "$(L "unreplaced variables in" "quedaron variables sin reemplazar en") $1"
+    fi
+    chmod 644 "$tmp"
+    mv -f "$tmp" "$2"
+}
+
+render hypr.lua      "$CFG/hypr/current-theme.lua"
+render hyprlock.conf "$CFG/hypr/hyprlock.conf"
+render waybar.css    "$CFG/waybar/current-theme.css"
+render rofi.rasi     "$CFG/rofi/current-theme.rasi"
+render kitty.conf    "$CFG/kitty/current-theme.conf"
+ln -sfn "$LOGO_PATH" "$CFG/fastfetch/current-logo.png"
+
+mkdir -p "$DOTS_STATE"
+echo "$THEME" >"$STATE_FILE"
+
+# --- GTK, icons and cursor ---
+set_ini() { # file key value
+    [[ -f "$1" ]] || { mkdir -p "$(dirname "$1")"; printf '[Settings]\n' >"$1"; }
+    if grep -q "^$2=" "$1"; then sed -i "s|^$2=.*|$2=$3|" "$1"; else echo "$2=$3" >>"$1"; fi
+}
+for f in "$CFG/gtk-3.0/settings.ini" "$CFG/gtk-4.0/settings.ini"; do
+    set_ini "$f" gtk-theme-name "$GTK"
+    set_ini "$f" gtk-icon-theme-name Papirus-Dark
+    set_ini "$f" gtk-cursor-theme-name "$CURSOR"
+    set_ini "$f" gtk-cursor-theme-size 24
+done
+if command -v gsettings >/dev/null; then
+    gsettings set org.gnome.desktop.interface gtk-theme "$GTK" 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface icon-theme Papirus-Dark 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface cursor-theme "$CURSOR" 2>/dev/null || true
+fi
+if [[ -n "$FOLDERS" ]] && command -v papirus-folders >/dev/null; then
+    papirus-folders -C "$FOLDERS" >/dev/null 2>&1 || true
+fi
+
+# --- Apply live (only inside Hyprland) ---
+if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+    awww img "$WALLPAPER_PATH" --transition-type wipe --transition-duration 1 >/dev/null 2>&1 || true
+    hyprctl setcursor "$CURSOR" 24 >/dev/null || true
+    hyprctl reload >/dev/null || true
+    pkill -USR1 -x kitty 2>/dev/null || true   # kitty reloads its config on SIGUSR1
+    if pgrep -x waybar >/dev/null; then
+        pkill -x waybar || true
+        setsid -f waybar >/dev/null 2>&1
+    fi
+fi
+
+echo "$(L "Theme applied" "Tema aplicado"): $THEME"

@@ -4,7 +4,7 @@ configuration {
 }
 
 /*****----- Global Properties -----*****/
-@import                          "~/.config/rofi/tema-actual.rasi"
+@import                          "~/.config/rofi/current-theme.rasi"
 
 
 *{

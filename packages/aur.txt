@@ -1,0 +1,3 @@
+# AUR packages (installed with yay or paru).
+brave-bin                        # browser (Super + B)
+papirus-folders-catppuccin-git   # Catppuccin folder colors for Papirus

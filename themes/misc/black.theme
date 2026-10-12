@@ -1,0 +1,12 @@
+# Black - grey on black
+ACCENT="#cfcfcf"
+INFO="#cfcfcf"
+BG="#1c1c1c"
+BG_ALT="#262626"
+TERMINAL_BG="#101010"
+LOCK_BG="#1c1c1c"
+WALLPAPER="batman.jpg"
+LOGO="fbat.png"
+GTK="hypr-dots-black"
+CURSOR="hypr-dots-black"
+FOLDERS="grey"

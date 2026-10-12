@@ -4,7 +4,7 @@ configuration {
 }
 
 /*****----- Global Properties -----*****/
-@import                          "./tema-actual.rasi"
+@import                          "./current-theme.rasi"
 @import                          "./fonts.rasi"
 
 /*****----- Main Window -----*****/

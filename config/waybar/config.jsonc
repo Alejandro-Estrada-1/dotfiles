@@ -36,16 +36,14 @@
     "custom/keybinds": {
         "format": "{icon} KB",
         "format-icons": ["󰘳"],
-        "on-click": "~/.local/bin/dots-atajos"
+        "on-click": "~/.local/bin/dots-keybinds"
     },
 
     "backlight": {
-        "device": "intel_backlight",
         "format": "{icon}  {percent}%",
         "format-icons": ["", ""]
     },
     "battery": {
-        "bat": "BAT0",
         "interval": 60,
         "states": {
             "warning": 30,
@@ -119,7 +117,7 @@
     "custom/power":{
         "format": "⏻ ",
         "tooltip": false,
-        "on-click": "bash ~/.config/rofi/powermenu.sh",
+        "on-click": "~/.local/bin/dots-powermenu",
         "on-click-right": "killall rofi",
     },
     "clock": {
