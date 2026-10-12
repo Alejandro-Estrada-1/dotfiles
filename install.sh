@@ -71,7 +71,8 @@ command -v pacman >/dev/null || die "this installer is for Arch-based distributi
 interactive=0; [[ -t 0 ]] && (( ! ASSUME_YES )) && interactive=1
 
 has_setting() { grep -q "^$1=" "$DOTS_SETTINGS" 2>/dev/null; }
-system_x11() { localectl status 2>/dev/null | sed -n "s/^ *X11 $1: //p"; }
+# Prints the system's X11 keyboard setting, or nothing when it is "(unset)" or "n/a"
+system_x11() { { localectl status 2>/dev/null || true; } | sed -n "s/^ *X11 $1: //p" | { grep -vxE '\(unset\)|n/a' || true; }; }
 
 if has_setting language; then
     default_lang=$DOTS_LANG
@@ -98,18 +99,21 @@ fi
 [[ "$LANG_CHOICE" == en || "$LANG_CHOICE" == es ]] || die "language must be 'en' or 'es'"
 DOTS_LANG=$LANG_CHOICE
 
-# Checks every comma-separated layout (and its variant) against xkeyboard-config.
-# Skipped when localectl cannot list layouts (e.g. inside some containers).
+# Checks every comma-separated layout (and its variant) against the list in
+# xkeyboard-config. Returns 0 if valid, 1 if not, 2 if it cannot tell yet (on a
+# fresh system xkeyboard-config arrives with the packages, so it is checked again later).
+XKB_LIST=/usr/share/X11/xkb/rules/base.lst
+xkb_section() { sed -n "/^! $1\$/,/^\$/{/^ /p}" "$XKB_LIST"; }
 valid_keyboard() { # layouts variants
     local known i
-    known=$(localectl list-x11-keymap-layouts 2>/dev/null) || return 0
-    [[ -z "$known" ]] && return 0
+    [[ -r "$XKB_LIST" ]] || return 2
+    known=$(xkb_section layout | awk '{print $1}')
     IFS=, read -ra layouts <<<"$1"
     IFS=, read -ra variants <<<"$2"
     for i in "${!layouts[@]}"; do
         grep -qx "${layouts[i]}" <<<"$known" || { warn "$(L "unknown layout" "distribución desconocida"): ${layouts[i]}"; return 1; }
         if [[ -n "${variants[i]:-}" ]] &&
-           ! localectl list-x11-keymap-variants "${layouts[i]}" 2>/dev/null | grep -qx "${variants[i]}"; then
+           ! xkb_section variant | awk -v l="${layouts[i]}:" '$2 == l {print $1}' | grep -qx "${variants[i]}"; then
             warn "$(L "unknown variant" "variante desconocida"): ${variants[i]} (${layouts[i]})"; return 1
         fi
     done
@@ -117,6 +121,7 @@ valid_keyboard() { # layouts variants
 
 default_layout=$(dots_setting kb_layout "$(system_x11 Layout)"); default_layout=${default_layout:-us}
 if has_setting kb_variant; then default_variant=$(dots_setting kb_variant ""); else default_variant=$(system_x11 Variant); fi
+KB_UNVERIFIED=0
 while :; do
     layout=${KB_LAYOUT:-$default_layout}
     # A layout given with --kb-layout does not inherit the saved variant
@@ -136,38 +141,48 @@ while :; do
             variant=${answer:-$suggested}
         fi
     fi
-    valid_keyboard "$layout" "$variant" && break
+    valid_keyboard "$layout" "$variant" && rc=0 || rc=$?
+    (( rc == 0 )) && break
+    if (( rc == 2 )); then KB_UNVERIFIED=1; break; fi
     (( interactive )) && [[ -z "$KB_LAYOUT" ]] || die "$(L "invalid keyboard layout" "distribución de teclado inválida"): $layout $variant"
 done
 
 # With more than one layout, add Ctrl + Space to switch between them unless
 # the options already have a switching key (grp:...) or were given explicitly.
-if [[ -n "${KB_OPTIONS+x}" ]]; then
-    options=$KB_OPTIONS
-else
-    options=$(dots_setting kb_options "")
-    if [[ "$layout" == *,* ]]; then
-        [[ "$options" == *grp:* ]] || options="${options:+$options,}grp:ctrl_space_toggle"
+resolve_options() {
+    if [[ -n "${KB_OPTIONS+x}" ]]; then
+        options=$KB_OPTIONS
     else
-        # A single layout has nothing to switch to; drop grp:* so Ctrl + Space reaches the apps
-        options=$(tr ',' '\n' <<<"$options" | { grep -v '^grp:' || true; } | paste -sd, -)
+        options=$(dots_setting kb_options "")
+        if [[ "$layout" == *,* ]]; then
+            [[ "$options" == *grp:* ]] || options="${options:+$options,}grp:ctrl_space_toggle"
+        else
+            # A single layout has nothing to switch to; drop grp:* so Ctrl + Space reaches the apps
+            options=$(tr ',' '\n' <<<"$options" | { grep -v '^grp:' || true; } | paste -sd, -)
+        fi
     fi
-fi
+}
 
-settings_text="# Preferences for the dotfiles, written by install.sh. You can edit them by hand;
+write_settings() {
+    local text="# Preferences for the dotfiles, written by install.sh. You can edit them by hand;
 # run 'hyprctl reload' afterwards.
 language=$DOTS_LANG
 kb_layout=$layout
 kb_variant=$variant
 kb_options=$options"
-run mkdir -p "$(dirname "$DOTS_SETTINGS")"
-if (( DRY_RUN )); then
-    echo "    [dry-run] $(L "write" "escribir") $(short "$DOTS_SETTINGS"):"; sed 's/^/      /' <<<"$settings_text"
-else
-    echo "$settings_text" >"$DOTS_SETTINGS"
-fi
+    run mkdir -p "$(dirname "$DOTS_SETTINGS")"
+    if (( DRY_RUN )); then
+        echo "    [dry-run] $(L "write" "escribir") $(short "$DOTS_SETTINGS"):"; sed 's/^/      /' <<<"$text"
+    else
+        echo "$text" >"$DOTS_SETTINGS"
+    fi
+}
+
+resolve_options
+write_settings
 step "$(L "Language" "Idioma"): $(L "English" "Español")"
 step "$(L "Keyboard" "Teclado"): $layout${variant:+ ($variant)}${options:+ [$options]}"
+(( KB_UNVERIFIED )) && echo "    $(L "(will be checked after installing the packages)" "(se comprobará después de instalar los paquetes)")"
 
 read_list() { grep -vE '^\s*(#|$)' "$1" | sed 's/#.*//' | awk '{print $1}'; }
 
@@ -200,6 +215,17 @@ if (( PACKAGES )); then
     fi
 else
     step "$(L "Skipping package installation (--no-packages)" "Omitiendo la instalación de paquetes (--no-packages)")"
+fi
+
+# Keyboard layouts that could not be checked before the packages were installed
+if (( KB_UNVERIFIED && ! DRY_RUN )); then
+    valid_keyboard "$layout" "$variant" && rc=0 || rc=$?
+    if (( rc == 1 )); then
+        warn "$(L "falling back to the 'us' keyboard layout" "se usará la distribución de teclado 'us'")"
+        layout=us; variant=""; resolve_options; write_settings
+    elif (( rc == 2 )); then
+        warn "$(L "could not check the keyboard layout (xkeyboard-config not found)" "no se pudo comprobar la distribución de teclado (no se encontró xkeyboard-config)")"
+    fi
 fi
 
 # --- 2. Config symlinks ---
@@ -242,9 +268,18 @@ fi
 # --- 4. Verify the Hyprland config ---
 if command -v Hyprland >/dev/null && (( ! DRY_RUN )); then
     step "$(L "Verifying the Hyprland configuration" "Verificando la configuración de Hyprland")"
-    result=$(cd /tmp && Hyprland --verify-config -c "$CFG/hypr/hyprland.lua" 2>&1 | sed -n '/parsing result/,$p' | tail -n +3)
+    # Hyprland needs XDG_RUNTIME_DIR even to verify; it is missing outside a login
+    # session (e.g. "su -" or containers), so use a temporary one in that case.
+    run_dir=${XDG_RUNTIME_DIR:-}
+    tmp_run_dir=""
+    [[ -z "$run_dir" ]] && { tmp_run_dir=$(mktemp -d); run_dir=$tmp_run_dir; }
+    result=$(cd /tmp && XDG_RUNTIME_DIR=$run_dir Hyprland --verify-config -c "$CFG/hypr/hyprland.lua" 2>&1 |
+             sed -n '/parsing result/,$p' | tail -n +3) || true
+    [[ -n "$tmp_run_dir" ]] && rm -rf "$tmp_run_dir"
     if [[ "$result" == "config ok" ]]; then
         echo "    config ok"
+    elif [[ -z "$result" ]]; then
+        warn "$(L "could not run Hyprland --verify-config" "no se pudo ejecutar Hyprland --verify-config")"
     else
         warn "$(L "Hyprland reported problems:" "Hyprland reportó problemas:")"; echo "$result" | sed 's/^/      /'
     fi
