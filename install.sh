@@ -9,6 +9,7 @@
 #   ./install.sh --kb-options grp:alt_shift_toggle   XKB options ("" for none)
 #   ./install.sh --theme red     initial theme (default: the saved one, or catppuccin/green)
 #   ./install.sh --dry-run       print what would be done without changing anything
+#   ./install.sh --yes           unattended: no questions, pacman/AUR run with --noconfirm
 #
 # Anything already in ~/.config is moved to ~/.config/dotfiles-backup-<date>/
 # before being replaced by a symlink to this repo.
@@ -28,6 +29,7 @@ SCRIPTS=(dots-theme dots-apply-theme dots-keybinds dots-powermenu)
 
 PACKAGES=1
 DRY_RUN=0
+ASSUME_YES=0
 THEME=""
 LANG_CHOICE=""
 KB_LAYOUT=""
@@ -40,12 +42,13 @@ die()  { echo "${red}  error: $*${reset}" >&2; exit 1; }
 run()  { if (( DRY_RUN )); then echo "    [dry-run] $*"; else "$@"; fi; }
 short() { echo "${1/#$HOME/\~}"; }
 
-usage() { sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; exit 0; }
+usage() { sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'; exit 0; }
 
 while (($#)); do
     case "$1" in
         --no-packages) PACKAGES=0 ;;
         --dry-run) DRY_RUN=1 ;;
+        -y|--yes) ASSUME_YES=1 ;;
         --theme) THEME="${2:?missing theme name}"; shift ;;
         --lang) LANG_CHOICE="${2:?missing language (en|es)}"; shift ;;
         --kb-layout) KB_LAYOUT="${2:?missing keyboard layout}"; shift ;;
@@ -57,13 +60,15 @@ while (($#)); do
     shift
 done
 
+NOCONFIRM=(); (( ASSUME_YES )) && NOCONFIRM=(--noconfirm)
+
 [[ $EUID -eq 0 ]] && die "do not run the installer as root; it asks for sudo when needed"
 command -v pacman >/dev/null || die "this installer is for Arch-based distributions (pacman not found)"
 
 # --- 0. Preferences: interface language and keyboard layout ---
 # Stored in $DOTS_SETTINGS (outside the repo). Defaults come from the saved
 # settings, then from the system (LANG, localectl), then from plain English/us.
-interactive=0; [[ -t 0 ]] && interactive=1
+interactive=0; [[ -t 0 ]] && (( ! ASSUME_YES )) && interactive=1
 
 has_setting() { grep -q "^$1=" "$DOTS_SETTINGS" 2>/dev/null; }
 system_x11() { localectl status 2>/dev/null | sed -n "s/^ *X11 $1: //p"; }
@@ -170,25 +175,26 @@ read_list() { grep -vE '^\s*(#|$)' "$1" | sed 's/#.*//' | awk '{print $1}'; }
 if (( PACKAGES )); then
     step "$(L "Installing packages from the official repositories" "Instalando paquetes de los repositorios oficiales")"
     mapfile -t official < <(read_list "$REPO/packages/pacman.txt")
-    run sudo pacman -S --needed "${official[@]}"
+    run sudo pacman -S --needed "${NOCONFIRM[@]}" "${official[@]}"
 
     step "$(L "Installing AUR packages" "Instalando paquetes del AUR")"
     mapfile -t aur < <(read_list "$REPO/packages/aur.txt")
     helper=""
     for h in paru yay; do command -v "$h" >/dev/null && { helper=$h; break; }; done
     if [[ -z "$helper" ]]; then
-        read -rp "  $(L "Neither paru nor yay found. Install yay from the AUR? [Y/n] " "No hay paru ni yay. ¿Instalar yay desde el AUR? [S/n] ")" answer
+        answer=""
+        (( ASSUME_YES )) || read -rp "  $(L "Neither paru nor yay found. Install yay from the AUR? [Y/n] " "No hay paru ni yay. ¿Instalar yay desde el AUR? [S/n] ")" answer
         if [[ ! "$answer" =~ ^[nN] ]]; then
-            run sudo pacman -S --needed base-devel git
+            run sudo pacman -S --needed "${NOCONFIRM[@]}" base-devel git
             tmp=$(mktemp -d)
             run git clone https://aur.archlinux.org/yay-bin.git "$tmp/yay-bin"
-            if (( DRY_RUN )); then echo "    [dry-run] (cd $tmp/yay-bin && makepkg -si)"; else (cd "$tmp/yay-bin" && makepkg -si); fi
+            if (( DRY_RUN )); then echo "    [dry-run] (cd $tmp/yay-bin && makepkg -si ${NOCONFIRM[*]})"; else (cd "$tmp/yay-bin" && makepkg -si "${NOCONFIRM[@]}"); fi
             rm -rf "$tmp"
             helper=yay
         fi
     fi
     if [[ -n "$helper" ]]; then
-        run "$helper" -S --needed "${aur[@]}"
+        run "$helper" -S --needed "${NOCONFIRM[@]}" "${aur[@]}"
     else
         warn "$(L "skipped AUR packages" "se omitieron los paquetes del AUR"): ${aur[*]}"
     fi
