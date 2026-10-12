@@ -24,8 +24,18 @@ DATA="${XDG_DATA_HOME:-$HOME/.local/share}"
 BIN="$HOME/.local/bin"
 BACKUP="$CFG/dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
 
-CONFIGS=(hypr waybar rofi kitty fastfetch cava swaync nwg-look)
-SCRIPTS=(dots-theme dots-apply-theme dots-keybinds dots-powermenu)
+CONFIGS=(hypr waybar rofi kitty fastfetch cava swaync nwg-look atuin)
+HOME_FILES=(.zshrc .zprofile .p10k.zsh)
+SCRIPTS=(dots-theme dots-apply-theme dots-keybinds dots-powermenu dots-update)
+
+# Zsh framework, theme and plugins (cloned with git, like a manual Oh My Zsh install)
+OMZ_DIR="$HOME/.oh-my-zsh"
+OMZ_REPOS=(
+    "$OMZ_DIR|https://github.com/ohmyzsh/ohmyzsh.git"
+    "$OMZ_DIR/custom/themes/powerlevel10k|https://github.com/romkatv/powerlevel10k.git"
+    "$OMZ_DIR/custom/plugins/zsh-autosuggestions|https://github.com/zsh-users/zsh-autosuggestions.git"
+    "$OMZ_DIR/custom/plugins/zsh-syntax-highlighting|https://github.com/zsh-users/zsh-syntax-highlighting.git"
+)
 
 PACKAGES=1
 DRY_RUN=0
@@ -255,6 +265,41 @@ step "$(L "Installing GTK themes and cursors into" "Instalando temas GTK y curso
 for d in "$REPO"/assets/gtk/*/;     do link "${d%/}" "$DATA/themes/$(basename "$d")"; done
 for d in "$REPO"/assets/cursors/*/; do link "${d%/}" "$DATA/icons/$(basename "$d")"; done
 
+# --- 2b. Zsh: shell files, Oh My Zsh and default shell ---
+step "$(L "Setting up zsh" "Configurando zsh")"
+for f in "${HOME_FILES[@]}"; do link "$REPO/home/$f" "$HOME/$f"; done
+for entry in "${OMZ_REPOS[@]}"; do
+    dir=${entry%%|*}; url=${entry#*|}
+    if [[ -d "$dir/.git" ]]; then
+        echo "    $(L "already installed" "ya instalado"): $(short "$dir")"
+    elif [[ -e "$dir" ]]; then
+        warn "$(L "exists but is not a git clone, left as is" "existe pero no es un clon de git, se deja como está"): $(short "$dir")"
+    else
+        run git clone -q --depth 1 "$url" "$dir"
+        echo "    $(L "installed" "instalado"): $(short "$dir")"
+    fi
+done
+
+zsh_path=$(command -v zsh || true)
+login_shell=$(getent passwd "$USER" | cut -d: -f7)
+if [[ -z "$zsh_path" ]]; then
+    warn "$(L "zsh is not installed; the default shell was not changed" "zsh no está instalado; no se cambió la shell por defecto")"
+elif [[ "$login_shell" == */zsh ]]; then
+    echo "    $(L "default shell" "shell por defecto"): $login_shell"
+elif [[ -n "${DOTS_UPDATING:-}" ]]; then
+    : # updates never change the default shell; that choice was made at install time
+else
+    answer=""
+    if (( interactive )); then
+        read -rp "    $(L "Make zsh your default shell (instead of $login_shell)? [Y/n] " "¿Usar zsh como shell por defecto (en lugar de $login_shell)? [S/n] ")" answer
+    fi
+    if [[ ! "$answer" =~ ^[nN] ]]; then
+        run sudo chsh -s "$zsh_path" "$USER"
+        login_shell=$zsh_path
+        echo "    $(L "default shell" "shell por defecto"): $zsh_path"
+    fi
+fi
+
 # --- 3. Initial theme ---
 step "$(L "Applying the theme" "Aplicando el tema")"
 if (( DRY_RUN )); then
@@ -288,11 +333,14 @@ fi
 echo
 step "$(L "Done" "Listo")"
 [[ -d "$BACKUP" ]] && echo "  $(L "Your previous files are in" "Tus archivos anteriores quedaron en") $(short "$BACKUP")"
+# ~/.zprofile adds ~/.local/bin to PATH, so only warn when zsh is not the login shell
 case ":$PATH:" in
     *":$BIN:"*) ;;
-    *) warn "$(short "$BIN") $(L "is not in your PATH (keybinds still work; it only matters to run the dots-* commands from a terminal)" "no está en tu PATH (los atajos funcionan igual; solo importa para usar los comandos dots-* en la terminal)")" ;;
+    *) [[ "$login_shell" == */zsh ]] || warn "$(short "$BIN") $(L "is not in your PATH (keybinds still work; it only matters to run the dots-* commands from a terminal)" "no está en tu PATH (los atajos funcionan igual; solo importa para usar los comandos dots-* en la terminal)")" ;;
 esac
-if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+if [[ -n "${DOTS_UPDATING:-}" ]]; then
+    echo "  $(L "Changes applied. Open a new terminal to load zsh changes; only autostart changes need a new login." "Cambios aplicados. Abre una terminal nueva para cargar los cambios de zsh; solo los cambios de autoinicio requieren volver a iniciar sesión.")"
+elif [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
     echo "  $(L "You are inside Hyprland. To load the Lua configuration without logging out, run:" "Estás dentro de Hyprland. Para cargar la configuración en Lua sin cerrar sesión ejecuta:")"
     echo "    hyprctl reload full-reset"
     echo "  $(L "(or log out and back in)." "(o cierra sesión y vuelve a entrar).")"

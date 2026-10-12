@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Updates the dotfiles: pulls the latest changes from git and re-runs the
+# installer with the saved preferences (language, keyboard and theme).
+# Nothing needs a reboot: Hyprland, Waybar and Kitty are reloaded live.
+#
+# Usage: dots-update          update if there are new commits
+#        dots-update --force  re-run the installer even without new commits
+set -euo pipefail
+
+REPO="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+# shellcheck source=lib/common.sh
+source "$REPO/scripts/lib/common.sh"
+
+die() { echo "dots-update: $*" >&2; exit 1; }
+
+before=$(git -C "$REPO" rev-parse HEAD)
+git -C "$REPO" pull --ff-only ||
+    die "$(L "could not update. If you edited files in the repo, commit or stash them first (git -C $REPO status)." \
+             "no se pudo actualizar. Si editaste archivos del repo, guárdalos primero con commit o stash (git -C $REPO status).")"
+after=$(git -C "$REPO" rev-parse HEAD)
+
+if [[ "$before" == "$after" && "${1:-}" != --force ]]; then
+    echo "$(L "Already up to date." "Ya está actualizado.")"
+    exit 0
+fi
+
+if [[ "$before" != "$after" ]]; then
+    echo "$(L "New changes:" "Cambios nuevos:")"
+    git -C "$REPO" log --oneline "$before..$after" | sed 's/^/  /'
+fi
+
+# Only touch packages (and ask for sudo) when the package lists changed
+args=(--yes)
+if [[ "$before" == "$after" ]] || git -C "$REPO" diff --quiet "$before" "$after" -- packages/; then
+    args+=(--no-packages)
+fi
+
+DOTS_UPDATING=1 exec "$REPO/install.sh" "${args[@]}"

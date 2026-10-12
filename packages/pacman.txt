@@ -15,6 +15,10 @@ qt6-wayland
 
 # Terminal and utilities
 kitty
+zsh
+zoxide                       # smarter cd
+atuin                        # shell history search
+fzf                          # fuzzy finder (zoxide's cdi)
 fastfetch
 cava
 flameshot

@@ -16,6 +16,7 @@ Es una reinterpretación de [sansroot/hypr-dots](https://github.com/sansroot/hyp
 | Fondos | awww |
 | Notificaciones | SwayNC |
 | Información del sistema | Fastfetch |
+| Shell | Zsh + Oh My Zsh + Powerlevel10k, zoxide, atuin |
 
 > [!IMPORTANT]
 > Esta configuración necesita **Hyprland 0.55 o superior**, porque usa `hyprland.lua` en lugar de `hyprland.conf`. El formato anterior está obsoleto desde 0.55 y se elimina en 0.57.
@@ -37,10 +38,11 @@ Lo que hace el instalador:
 3. Mueve lo que ya tengas en `~/.config/{hypr,waybar,rofi,...}` a `~/.config/dotfiles-backup-<fecha>/`.
 4. Crea enlaces simbólicos de `~/.config/*` hacia el repo, así que **editar un archivo en `~/.config` lo edita en el repo** y git ve el cambio.
 5. Enlaza los temas GTK y los cursores en `~/.local/share` (no necesita sudo).
-6. Aplica el tema y revisa la configuración con `Hyprland --verify-config`.
+6. Configura zsh: enlaza `~/.zshrc`, `~/.zprofile` y `~/.p10k.zsh`, instala Oh My Zsh con Powerlevel10k y sus plugins, y ofrece usar zsh como shell por defecto.
+7. Aplica el tema y revisa la configuración con `Hyprland --verify-config`.
 
 > [!WARNING]
-> El instalador reemplaza `~/.config/hypr`, `waybar`, `rofi`, `kitty`, `fastfetch`, `cava`, `swaync` y `nwg-look` por enlaces simbólicos. Tus archivos anteriores no se borran: se mueven a `~/.config/dotfiles-backup-<fecha>/`.
+> El instalador reemplaza `~/.config/hypr`, `waybar`, `rofi`, `kitty`, `fastfetch`, `cava`, `swaync`, `nwg-look` y `atuin`, además de `~/.zshrc`, `~/.zprofile` y `~/.p10k.zsh`, por enlaces simbólicos. Tus archivos anteriores no se borran: se mueven a `~/.config/dotfiles-backup-<fecha>/`.
 
 Opciones:
 
@@ -52,6 +54,7 @@ Opciones:
 ./install.sh --kb-options caps:escape  # opciones de XKB ("" para ninguna)
 ./install.sh --theme anonymous # tema inicial
 ./install.sh --dry-run         # muestra lo que haría sin cambiar nada
+./install.sh --yes             # sin preguntas: pacman/AUR con --noconfirm
 ```
 
 > [!TIP]
@@ -59,6 +62,37 @@ Opciones:
 
 > [!NOTE]
 > Si ejecutas el instalador desde una sesión de Hyprland que todavía usa `hyprland.conf`, carga la configuración en Lua con `hyprctl reload full-reset`, o cierra sesión y vuelve a entrar.
+
+## Actualizar
+
+Como `~/.config` apunta al repo, no hace falta reinstalar nada ni reiniciar:
+
+```sh
+dots-update
+```
+
+Hace `git pull` y vuelve a ejecutar el instalador con tu idioma, teclado y tema guardados. Solo instala paquetes (y pide sudo) si cambiaron las listas de paquetes, enlaza los archivos nuevos y recarga en vivo Hyprland, Waybar y Kitty. Abre una terminal nueva para cargar los cambios de zsh.
+
+> [!NOTE]
+> Solo los cambios de autoinicio (lo que se ejecuta una vez al iniciar sesión) requieren cerrar sesión y volver a entrar.
+
+> [!TIP]
+> Si editaste archivos del repo, `dots-update` se detiene en lugar de sobrescribirlos. Guárdalos primero con `git commit` o apártalos con `git stash`.
+
+## Shell
+
+[`home/.zshrc`](home/.zshrc) es el mismo en todas las máquinas:
+
+- `fastfetch` se ejecuta al abrir una terminal, con el logo del tema activo.
+- Oh My Zsh con Powerlevel10k (`p10k configure` para cambiar el prompt), `zsh-autosuggestions` y `zsh-syntax-highlighting`.
+- `cd` se reemplaza por [zoxide](https://github.com/ajeetdsouza/zoxide): `cd proy` salta a la carpeta más usada que coincida con "proy".
+- [atuin](https://github.com/atuinsh/atuin) reemplaza la búsqueda en el historial (`Ctrl + R`).
+- conda/mamba (`~/miniforge3`), pyenv, rbenv y spicetify solo se cargan si están instalados.
+
+Lo que solo tiene sentido en una máquina va en `~/.zshrc.local` o `~/.zprofile.local`, que no forman parte del repo.
+
+> [!NOTE]
+> El historial de atuin y su clave de cifrado viven en `~/.local/share/atuin` y nunca se agregan al repo. Para llevar tu historial a otra máquina usa `atuin login` y `atuin sync`.
 
 ## Idioma y teclado
 
@@ -192,16 +226,17 @@ Si conectas el monitor externo con la sesión ya iniciada, recibe el fondo del t
 .
 ├── install.sh
 ├── packages/              pacman.txt y aur.txt
+├── home/                  .zshrc, .zprofile, .p10k.zsh (se enlazan en ~)
 ├── config/                se enlaza en ~/.config/
 │   ├── hypr/
 │   │   ├── hyprland.lua   punto de entrada
 │   │   └── modules/       monitores, atajos, apariencia, entrada, autoinicio, reglas, preferencias, idioma...
-│   ├── waybar/  rofi/  kitty/  fastfetch/  cava/  swaync/  nwg-look/
+│   ├── waybar/  rofi/  kitty/  fastfetch/  cava/  swaync/  nwg-look/  atuin/
 ├── themes/
 │   ├── catppuccin/*.theme
 │   ├── misc/*.theme
 │   └── templates/         de aquí salen los archivos current-theme.*
-├── scripts/               dots-theme, dots-apply-theme, dots-keybinds, dots-powermenu
+├── scripts/               dots-theme, dots-apply-theme, dots-keybinds, dots-powermenu, dots-update
 │   └── lib/common.sh      funciones compartidas (preferencias, idioma)
 ├── wallpapers/
 └── assets/                temas GTK y cursores hypr-dots-*
@@ -223,7 +258,7 @@ Documentación: <https://wiki.hypr.land/Configuring/Start/>
 
 ## Desinstalar
 
-Borra los enlaces (`~/.config/{hypr,waybar,rofi,kitty,fastfetch,cava,swaync,nwg-look}`, `~/.local/bin/dots-*`, `~/.local/share/{themes,icons}/hypr-dots-*`) y mueve de vuelta lo que quieras de `~/.config/dotfiles-backup-<fecha>/`.
+Borra los enlaces (`~/.config/{hypr,waybar,rofi,kitty,fastfetch,cava,swaync,nwg-look,atuin}`, `~/.zshrc`, `~/.zprofile`, `~/.p10k.zsh`, `~/.local/bin/dots-*`, `~/.local/share/{themes,icons}/hypr-dots-*`) y mueve de vuelta lo que quieras de `~/.config/dotfiles-backup-<fecha>/`.
 
 ## Créditos
 
