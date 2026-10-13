@@ -3,7 +3,7 @@
 # Each theme remembers its own choice in ~/.config/dotfiles/wallpapers (outside
 # the repo, one "theme=path" per line); without one it uses the theme's default.
 #
-# Usage: dots-wallpaper              picker with thumbnails (Alt + W)
+# Usage: dots-wallpaper              picker (Alt + W): current wallpaper, then what to do
 #        dots-wallpaper <image>      use that image for the active theme
 #        dots-wallpaper --reset      go back to the theme's default wallpaper
 #        dots-wallpaper --folder     print the folder for your own wallpapers
@@ -57,43 +57,75 @@ thumbnail() { # image -> cached 320x200 thumbnail (falls back to the image)
     [[ -f "$thumb" ]] && printf '%s' "$thumb" || printf '%s' "$img"
 }
 
+# Wallpaper of the active theme: the one chosen with dots-wallpaper, or the default
+theme_default() { printf '%s/wallpapers/%s' "$REPO" "$(sed -n 's/^WALLPAPER="\(.*\)"$/\1/p' "$REPO/themes/$THEME.theme")"; }
+theme_custom() {
+    local path
+    path=$(awk -F= -v t="$THEME" '$1 == t { sub(/^[^=]*=/, ""); p = $0 } END { print p }' "$OVERRIDES" 2>/dev/null)
+    [[ -n "$path" && -f "$path" ]] && printf '%s' "$path"
+}
+
+rofi_menu() { # prompt message theme-overrides -> index of the chosen entry (stdin: entries)
+    rofi -dmenu -i -show-icons -format i -p "$1" -mesg "$2" \
+         -theme "$REPO/scripts/rofi/wallpaper.rasi" -theme-str "$3"
+}
+
+# Step 1: the current wallpaper. Step 2: what to do with it. Step 3: pick an image.
 pick() {
     mkdir -p "$USER_DIR" "$THUMBS"
     if pgrep -x rofi >/dev/null; then pkill -x rofi; exit 0; fi
 
-    local -a paths=() labels=()
-    if grep -q "^$THEME=" "$OVERRIDES" 2>/dev/null; then
-        paths+=("--reset")
-        labels+=("$(L "Theme default" "Fondo del tema")")
+    local default custom current
+    default=$(theme_default)
+    custom=$(theme_custom || true)
+    current=${custom:-$default}
+
+    local big='window { width: 380px; } listview { columns: 1; lines: 1; } element-icon { size: 240px; }'
+    printf '%s\0icon\x1f%s\n' "$(basename "${current%.*}")" "$(thumbnail "$current")" |
+        rofi_menu "$(L "WALLPAPER" "FONDO")" \
+                  "$(L "Theme" "Tema"): $THEME
+$(L "Select it to change it" "Selecciónalo para cambiarlo")" "$big" >/dev/null || exit 0
+
+    local -a actions=(change folder) texts=(
+        "$(L "Yes, choose another image" "Sí, elegir otra imagen")"
+        "$(L "Open my wallpapers folder" "Abrir mi carpeta de fondos")")
+    if [[ -n "$custom" ]]; then
+        actions+=(reset); texts+=("$(L "Restore the theme's original wallpaper" "Restaurar el fondo original del tema")")
     fi
+    actions+=(cancel); texts+=("$(L "No" "No")")
+    local list='window { width: 460px; } listview { columns: 1; lines: 4; fixed-height: false; }
+                element { orientation: horizontal; padding: 10px 14px; } element-icon { size: 0px; }
+                element-text { horizontal-align: 0; }'
+    local answer
+    answer=$(printf '%s\n' "${texts[@]}" |
+        rofi_menu "$(L "Change it?" "¿Cambiarlo?")" "$(L "Theme" "Tema"): $THEME" "$list") || exit 0
+    case "${actions[answer]:-cancel}" in
+        folder) xdg-open "$USER_DIR" >/dev/null 2>&1 & disown; exit 0 ;;
+        reset) save_choice ""; exit 0 ;;
+        cancel) exit 0 ;;
+    esac
+
     # Your own images first, then the ones that come with the repo
-    local dir
+    local -a paths=() labels=()
+    local dir img own=0
     for dir in "$USER_DIR" "$REPO/wallpapers"; do
         while IFS= read -r -d '' img; do
             paths+=("$img"); labels+=("$(basename "${img%.*}")")
+            [[ "$dir" == "$USER_DIR" ]] && own=$((own + 1))
         done < <(find "$dir" -maxdepth 2 -type f \
                       \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) -print0 | sort -z)
     done
-
-    # Thumbnails are cached, so only the first run per image takes a moment
-    local default_img
-    default_img="$REPO/wallpapers/$(sed -n 's/^WALLPAPER="\(.*\)"$/\1/p' "$REPO/themes/$THEME.theme")"
-    local i icon choice
-    choice=$(
-        for i in "${!paths[@]}"; do
-            if [[ "${paths[i]}" == "--reset" ]]; then icon=$(thumbnail "$default_img"); else icon=$(thumbnail "${paths[i]}"); fi
-            printf '%s\0icon\x1f%s\n' "${labels[i]}" "$icon"
-        done | rofi -dmenu -i -show-icons -format i -p "$(L "WALLPAPER" "FONDO")" \
-                    -mesg "$(L "Theme" "Tema"): $THEME     $(L "Your own images go in" "Tus imágenes van en") ${USER_DIR/#$HOME/\~}" \
-                    -theme "$REPO/scripts/rofi/wallpaper.rasi"
-    ) || exit 0
-    [[ -z "$choice" ]] && exit 0
-
-    if [[ "${paths[choice]}" == "--reset" ]]; then
-        save_choice ""
+    local hint
+    if (( own == 0 )); then
+        hint="$(L "You have no images of your own yet: add them to" "Aún no tienes imágenes propias: agrégalas en") ${USER_DIR/#$HOME/\~}"
     else
-        save_choice "${paths[choice]}"
+        hint="$(L "Your images first, then the ones included" "Primero tus imágenes, después las incluidas") (${USER_DIR/#$HOME/\~})"
     fi
+    local i choice
+    # Thumbnails are cached, so only the first run per image takes a moment
+    choice=$(for i in "${!paths[@]}"; do printf '%s\0icon\x1f%s\n' "${labels[i]}" "$(thumbnail "${paths[i]}")"; done |
+        rofi_menu "$(L "IMAGE" "IMAGEN")" "$(L "Theme" "Tema"): $THEME     $hint" "") || exit 0
+    [[ -n "$choice" ]] && save_choice "${paths[choice]}"
 }
 
 case "${1:-}" in

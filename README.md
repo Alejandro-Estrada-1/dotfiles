@@ -170,7 +170,16 @@ FOLDERS="cat-mocha-green"
 
 ### Changing the wallpaper
 
-Each theme comes with a wallpaper, but you can pick another one at any time with `Alt + W`: a grid of thumbnails with your own images first and the ones in the repo after. The choice applies to the desktop and the lock screen at once, and each theme remembers its own, so you can give the blue theme a different blue wallpaper without touching the others.
+Each theme comes with a wallpaper, but you can pick another one at any time with `Alt + W`:
+
+1. The picker shows the active theme and its current wallpaper. Select it to change it.
+2. It asks what to do:
+   - **Yes, choose another image** opens a grid of thumbnails, with your own images first and the ones in the repo after.
+   - **Open my wallpapers folder** opens the folder for your own images in the file manager.
+   - **Restore the theme's original wallpaper** only appears when you changed it, and undoes the change.
+   - **No** (or `Esc` at any step) leaves everything as it was.
+
+The choice applies to the desktop and the lock screen at once, and each theme remembers its own, so you can give the blue theme a different blue wallpaper without touching the others.
 
 Put your own images in the `Wallpapers` folder inside your pictures folder (for example `~/Pictures/Wallpapers` or `~/Imágenes/Wallpapers`; `dots-wallpaper --folder` prints it). From a terminal:
 

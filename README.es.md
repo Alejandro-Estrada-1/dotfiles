@@ -170,7 +170,16 @@ FOLDERS="cat-mocha-green"
 
 ### Cambiar el fondo de pantalla
 
-Cada tema trae un fondo, pero puedes elegir otro cuando quieras con `Alt + W`: una cuadrícula de miniaturas con tus imágenes primero y las del repo después. El cambio se aplica a la vez al escritorio y a la pantalla de bloqueo, y cada tema recuerda el suyo, así que puedes darle al tema blue otro fondo azul sin tocar los demás.
+Cada tema trae un fondo, pero puedes elegir otro cuando quieras con `Alt + W`:
+
+1. El selector muestra el tema activo y su fondo actual. Selecciónalo para cambiarlo.
+2. Te pregunta qué hacer:
+   - **Sí, elegir otra imagen** abre una cuadrícula de miniaturas, con tus imágenes primero y las del repo después.
+   - **Abrir mi carpeta de fondos** abre en el gestor de archivos la carpeta para tus imágenes.
+   - **Restaurar el fondo original del tema** solo aparece si lo cambiaste, y deshace el cambio.
+   - **No** (o `Esc` en cualquier paso) deja todo como estaba.
+
+El cambio se aplica a la vez al escritorio y a la pantalla de bloqueo, y cada tema recuerda el suyo, así que puedes darle al tema blue otro fondo azul sin tocar los demás.
 
 Pon tus imágenes en la carpeta `Wallpapers` dentro de tu carpeta de imágenes (por ejemplo `~/Imágenes/Wallpapers` o `~/Pictures/Wallpapers`; `dots-wallpaper --folder` te la muestra). Desde la terminal:
 
