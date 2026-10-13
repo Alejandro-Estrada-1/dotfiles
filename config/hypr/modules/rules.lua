@@ -10,6 +10,15 @@ hl.window_rule({
     suppress_event = "maximize",
 })
 
+-- Blur behind the translucent media panel (scripts/dots-media). ignore_alpha
+-- keeps the fully transparent area around the panel from being blurred.
+hl.layer_rule({
+    name  = "blur-media-panel",
+    match = { namespace = "^dots-media$" },
+    blur  = true,
+    ignore_alpha = 0.1,
+})
+
 -- Fix some dragging issues with XWayland
 hl.window_rule({
     name  = "fix-xwayland-drags",

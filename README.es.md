@@ -14,7 +14,8 @@ Es una reinterpretación de [sansroot/hypr-dots](https://github.com/sansroot/hyp
 | Terminal | Kitty |
 | Pantalla de bloqueo | Hyprlock |
 | Fondos | awww |
-| Notificaciones | SwayNC, también el centro de control de medios |
+| Notificaciones | SwayNC |
+| Centro de control de medios | scripts/dots-media (GTK 4) |
 | Información del sistema | Fastfetch |
 | Gestor de archivos | Thunar (también se instala Dolphin) |
 | Bandeja | nm-applet (red), blueman (Bluetooth) |
@@ -215,7 +216,8 @@ El botón **KB** de la barra muestra la lista completa. Se lee de la configuraci
 | `Super + Shift + ,` / `.` | Mover ventana al monitor izquierdo / derecho |
 | `Super + E` | Gestor de archivos (Thunar) |
 | `Super + B` | Navegador (Brave) |
-| `Super + N` | Panel de medios y notificaciones |
+| `Super + P` | Panel de medios |
+| `Super + N` | Panel de notificaciones |
 | `Super + L` | Bloquear pantalla |
 | `Super + K` / `Super + J` | Cerrar / abrir la barra |
 | `Impr Pant` | Captura de pantalla (Flameshot) |
@@ -225,9 +227,9 @@ Los atajos están en [`config/hypr/modules/keybinds.lua`](config/hypr/modules/ke
 
 ## Centro de control de medios
 
-El botón 󰝚 de la barra (o `Super + N`) abre debajo un panel pequeño con lo que está sonando: carátula, título y botones de anterior, pausar/reproducir y siguiente. Cada reproductor tiene su propia tarjeta (Spotify, un video en el navegador...), así que puedes pausar uno sin afectar a los demás; cambia entre ellos con las flechas, los puntos o la rueda del mouse. Debajo aparecen las notificaciones y "No molestar".
+El botón 󰝚 de la barra (o `Super + P`) abre debajo un panel pequeño y semitransparente, con desenfoque para que se vea el escritorio detrás. Tiene una pestaña por reproductor (Spotify, un video en el navegador...) con carátula, título, artista, progreso y botones de anterior, pausar/reproducir y siguiente, así que puedes pausar uno sin afectar a los demás. Si no suena nada, lo indica. Se cierra con el mismo botón, con Esc o haciendo clic fuera.
 
-El panel es el centro de control de SwayNC ([`themes/templates/swaync-config.json`](themes/templates/swaync-config.json)). Su estilo parte del que trae SwayNC y solo cambia los colores por los del tema activo, así que cambia junto con el resto del escritorio.
+Es [`scripts/dots-media`](scripts/dots-media), una pequeña aplicación de GTK 4 que sigue el tema activo y el idioma de la interfaz. Las notificaciones tienen su propio panel: `Super + N`.
 
 > [!NOTE]
 > Aparece cualquier aplicación compatible con MPRIS: Spotify, los navegadores, mpv con `mpv-mpris` y la mayoría de los reproductores de música. Para ver qué detecta el sistema, ejecuta `playerctl -l`.
@@ -268,7 +270,7 @@ Si conectas el monitor externo con la sesión ya iniciada, recibe el fondo del t
 │   ├── catppuccin/*.theme
 │   ├── misc/*.theme
 │   └── templates/         de aquí salen los archivos current-theme.*
-├── scripts/               dots-theme, dots-apply-theme, dots-keybinds, dots-powermenu, dots-update, dots-cava
+├── scripts/               dots-theme, dots-apply-theme, dots-keybinds, dots-powermenu, dots-update, dots-cava, dots-media
 │   └── lib/common.sh      funciones compartidas (preferencias, idioma)
 ├── wallpapers/
 └── assets/                temas GTK y cursores hypr-dots-*

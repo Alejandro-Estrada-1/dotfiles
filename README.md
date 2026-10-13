@@ -14,7 +14,8 @@ It is a reinterpretation of [sansroot/hypr-dots](https://github.com/sansroot/hyp
 | Terminal | Kitty |
 | Lock screen | Hyprlock |
 | Wallpapers | awww |
-| Notifications | SwayNC, also the media control center |
+| Notifications | SwayNC |
+| Media control center | scripts/dots-media (GTK 4) |
 | System info | Fastfetch |
 | File manager | Thunar (Dolphin is also installed) |
 | Tray | nm-applet (network), blueman (Bluetooth) |
@@ -215,7 +216,8 @@ The **KB** button on the bar shows the full list. It is read from the live confi
 | `Super + Shift + ,` / `.` | Move window to left / right monitor |
 | `Super + E` | File manager (Thunar) |
 | `Super + B` | Browser (Brave) |
-| `Super + N` | Media and notifications panel |
+| `Super + P` | Media panel |
+| `Super + N` | Notifications panel |
 | `Super + L` | Lock screen |
 | `Super + K` / `Super + J` | Close / open the bar |
 | `Print` | Screenshot (Flameshot) |
@@ -225,9 +227,9 @@ Keybinds live in [`config/hypr/modules/keybinds.lua`](config/hypr/modules/keybin
 
 ## Media control center
 
-The 󰝚 button on the bar (or `Super + N`) opens a small panel under it with whatever is playing: album art, title, and previous / play-pause / next buttons. Every player gets its own card (Spotify, a video in the browser, ...), so you can pause one without touching the others; switch between them with the arrows, the dots or the mouse wheel. Notifications and "Do not disturb" are listed below.
+The 󰝚 button on the bar (or `Super + P`) opens a small translucent panel under it, blurred so the desktop shows through. It has one tab per player (Spotify, a video in the browser, ...) with album art, title, artist, progress and previous / play-pause / next, so you can pause one player without touching the others. When nothing is playing it says so. Click the button again, press Esc or click outside to close it.
 
-The panel is the SwayNC control center ([`themes/templates/swaync-config.json`](themes/templates/swaync-config.json)). Its style builds on the one shipped with SwayNC and only swaps the colors for the active theme, so it changes along with the rest of the desktop.
+It is [`scripts/dots-media`](scripts/dots-media), a small GTK 4 app that follows the active theme and the interface language. Notifications have their own panel: `Super + N`.
 
 > [!NOTE]
 > Any app that supports MPRIS shows up: Spotify, browsers, mpv with `mpv-mpris`, and most music players. To check what the system sees, run `playerctl -l`.
@@ -268,7 +270,7 @@ When the external monitor is plugged in after logging in, it gets the theme's wa
 │   ├── catppuccin/*.theme
 │   ├── misc/*.theme
 │   └── templates/         source of the current-theme.* files
-├── scripts/               dots-theme, dots-apply-theme, dots-keybinds, dots-powermenu, dots-update, dots-cava
+├── scripts/               dots-theme, dots-apply-theme, dots-keybinds, dots-powermenu, dots-update, dots-cava, dots-media
 │   └── lib/common.sh      shared helpers (settings, language)
 ├── wallpapers/
 └── assets/                hypr-dots-* GTK themes and cursors

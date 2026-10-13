@@ -14,12 +14,12 @@
 			"default": ["", "", ""]
 		}
 	},
-    // Media control center: opens the swaync panel with every player
-    // (album art, play/pause, previous/next; scroll to switch between players)
+    // Media panel (scripts/dots-media): one tab per player with album art,
+    // progress and previous / play-pause / next. Click again to close it.
     "custom/media": {
         "format": "󰝚",
         "tooltip": false,
-        "on-click": "swaync-client -t -sw"
+        "on-click": "~/.local/bin/dots-media"
     },
 
     // Audio visualizer: scripts/dots-cava feeds it from cava (works with the

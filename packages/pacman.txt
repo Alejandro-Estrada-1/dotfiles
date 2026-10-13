@@ -9,6 +9,8 @@ waybar
 rofi
 awww                         # wallpapers (successor of swww)
 swaync                       # notifications
+gtk4-layer-shell             # media panel (scripts/dots-media)
+python-gobject
 polkit-gnome
 qt5-wayland
 qt6-wayland

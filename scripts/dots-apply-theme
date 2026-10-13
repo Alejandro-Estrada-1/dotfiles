@@ -99,6 +99,7 @@ render rofi.rasi     "$CFG/rofi/current-theme.rasi"
 render kitty.conf    "$CFG/kitty/current-theme.conf"
 render swaync.css    "$CFG/swaync/current-theme.css"
 render swaync-config.json "$CFG/swaync/config.json"
+render media.css     "$CFG/dots-media/current-theme.css"
 ln -sfn "$LOGO_PATH" "$CFG/fastfetch/current-logo.png"
 
 mkdir -p "$DOTS_STATE"

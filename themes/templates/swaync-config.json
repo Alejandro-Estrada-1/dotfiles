@@ -29,18 +29,11 @@
   "hide-on-action": true,
   "text-empty": "{{T_NO_NOTIFICATIONS}}",
   "widgets": [
-    "mpris",
     "title",
     "dnd",
     "notifications"
   ],
   "widget-config": {
-    "mpris": {
-      "blacklist": [],
-      "autohide": false,
-      "show-album-art": "always",
-      "loop-carousel": true
-    },
     "title": {
       "text": "{{T_NOTIFICATIONS}}",
       "clear-all-button": true,

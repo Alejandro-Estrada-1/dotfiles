@@ -24,9 +24,9 @@ DATA="${XDG_DATA_HOME:-$HOME/.local/share}"
 BIN="$HOME/.local/bin"
 BACKUP="$CFG/dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
 
-CONFIGS=(hypr waybar rofi kitty fastfetch cava swaync nwg-look atuin)
+CONFIGS=(hypr waybar rofi kitty fastfetch cava swaync nwg-look atuin dots-media)
 HOME_FILES=(.zshrc .zprofile .p10k.zsh)
-SCRIPTS=(dots-theme dots-apply-theme dots-keybinds dots-powermenu dots-update dots-cava)
+SCRIPTS=(dots-theme dots-apply-theme dots-keybinds dots-powermenu dots-update dots-cava dots-media)
 
 # Zsh framework, theme and plugins (cloned with git, like a manual Oh My Zsh install)
 OMZ_DIR="$HOME/.oh-my-zsh"
