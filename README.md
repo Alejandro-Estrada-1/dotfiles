@@ -6,6 +6,8 @@ My Hyprland setup for Arch Linux and Arch-based distributions, with 14 themes yo
 
 It is a reinterpretation of [sansroot/hypr-dots](https://github.com/sansroot/hypr-dots) with my own changes: external monitor support, new wallpapers, a Hyprland configuration migrated to **Lua**, a bilingual interface and a palette-based theme system instead of full copies of every config file per theme.
 
+![Switching themes on the fly: wallpaper, colors, bar, terminals and fastfetch logo change together](docs/demo.gif)
+
 | Component | Program |
 | --- | --- |
 | Compositor | [Hyprland](https://hypr.land) (Lua configuration) |
@@ -297,7 +299,8 @@ When the external monitor is plugged in after logging in, it gets the theme's wa
 ├── scripts/               dots-theme, dots-apply-theme, dots-keybinds, dots-powermenu, dots-update, dots-cava, dots-media, dots-mediakey, dots-wallpaper
 │   └── lib/common.sh      shared helpers (settings, language)
 ├── wallpapers/
-└── assets/                hypr-dots-* GTK themes and cursors
+├── assets/                hypr-dots-* GTK themes and cursors
+└── docs/                  demo.gif for this README
 ```
 
 ## About the Lua migration
