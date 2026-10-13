@@ -84,7 +84,7 @@ pick() {
             if [[ "${paths[i]}" == "--reset" ]]; then icon=$(thumbnail "$default_img"); else icon=$(thumbnail "${paths[i]}"); fi
             printf '%s\0icon\x1f%s\n' "${labels[i]}" "$icon"
         done | rofi -dmenu -i -show-icons -format i -p "$(L "WALLPAPER" "FONDO")" \
-                    -mesg "$(L "Your own images go in" "Tus imágenes van en") ${USER_DIR/#$HOME/\~}" \
+                    -mesg "$(L "Theme" "Tema"): $THEME     $(L "Your own images go in" "Tus imágenes van en") ${USER_DIR/#$HOME/\~}" \
                     -theme "$REPO/scripts/rofi/wallpaper.rasi"
     ) || exit 0
     [[ -z "$choice" ]] && exit 0

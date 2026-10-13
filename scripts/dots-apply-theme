@@ -162,7 +162,23 @@ if [[ -n "$FOLDERS" ]] && command -v papirus-folders >/dev/null; then
     fi
 fi
 
-# --- Apply live (only inside Hyprland) ---
+# --- Apply live ---
+# Also when run outside the session (SSH, a TTY, dots-update) while this user's
+# Hyprland is running: otherwise only the files would change, and what is on
+# screen would no longer match the saved theme.
+if [[ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" && -d "${XDG_RUNTIME_DIR:-}/hypr" ]]; then
+    while read -r instance; do
+        if [[ -S "$XDG_RUNTIME_DIR/hypr/$instance/.socket.sock" ]] &&
+           HYPRLAND_INSTANCE_SIGNATURE=$instance hyprctl version >/dev/null 2>&1; then
+            export HYPRLAND_INSTANCE_SIGNATURE=$instance
+            break
+        fi
+    done < <(find "$XDG_RUNTIME_DIR/hypr" -mindepth 1 -maxdepth 1 -type d -printf '%T@ %f\n' | sort -rn | cut -d' ' -f2)
+fi
+if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" && -z "${WAYLAND_DISPLAY:-}" ]]; then
+    WAYLAND_DISPLAY=$(find "$XDG_RUNTIME_DIR" -maxdepth 1 -type s -name 'wayland-[0-9]*' -printf '%f\n' | sort | head -1)
+    export WAYLAND_DISPLAY
+fi
 if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
     awww img "$WALLPAPER_PATH" --transition-type wipe --transition-duration 1 >/dev/null 2>&1 || true
     hyprctl setcursor "$CURSOR" 24 >/dev/null || true
