@@ -53,6 +53,11 @@ source "$THEME_FILE"
 : "${LOCK_INPUT_TEXT:=$TEXT}" "${TERMINAL_BRIGHT:=$TEXT}" "${FOLDERS:=}"
 NAME="$THEME"
 WALLPAPER_PATH="$REPO/wallpapers/$WALLPAPER"
+# A wallpaper chosen with dots-wallpaper for this theme wins over the default
+# (if that image was deleted, the default is used again)
+custom=$(awk -F= -v t="$THEME" '$1 == t { sub(/^[^=]*=/, ""); p = $0 } END { print p }' \
+             "$DOTS_CONFIG/dotfiles/wallpapers" 2>/dev/null || true)
+[[ -n "$custom" && -f "$custom" ]] && WALLPAPER_PATH=$custom
 LOGO_PATH="$REPO/config/fastfetch/logos/$LOGO"
 [[ -f "$WALLPAPER_PATH" ]] || die "$(L "wallpaper not found" "no existe el fondo"): $WALLPAPER_PATH"
 [[ -f "$LOGO_PATH" ]] || die "$(L "logo not found" "no existe el logo"): $LOGO_PATH"

@@ -1,0 +1,94 @@
+/* Wallpaper picker (scripts/dots-wallpaper): a grid of thumbnails. */
+configuration {
+    show-icons: true;
+}
+
+@import "~/.config/rofi/current-theme.rasi"
+
+* {
+    font: "JetBrainsMono Nerd Font 10";
+}
+
+window {
+    location: center;
+    anchor: center;
+    width: 900px;
+    border: 3px solid;
+    border-color: @selected;
+    border-radius: 10px;
+    background-color: @background;
+}
+
+mainbox {
+    spacing: 12px;
+    padding: 16px;
+    background-color: transparent;
+    children: [ "inputbar", "message", "listview" ];
+}
+
+inputbar {
+    children: [ "prompt", "entry" ];
+    spacing: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background-color: @background-alt;
+    text-color: @foreground;
+}
+
+prompt {
+    background-color: transparent;
+    text-color: @selected;
+}
+
+entry {
+    background-color: transparent;
+    text-color: @foreground;
+    placeholder: "";
+}
+
+message {
+    padding: 0 4px;
+    background-color: transparent;
+}
+
+textbox {
+    background-color: transparent;
+    text-color: @foreground;
+}
+
+listview {
+    columns: 4;
+    lines: 2;
+    spacing: 12px;
+    fixed-height: true;
+    scrollbar: false;
+    background-color: transparent;
+}
+
+element {
+    orientation: vertical;
+    spacing: 6px;
+    padding: 8px;
+    border-radius: 8px;
+    background-color: @background-alt;
+    text-color: @foreground;
+    cursor: pointer;
+}
+
+element selected.normal {
+    background-color: @selected;
+    text-color: @background;
+}
+
+element-icon {
+    size: 120px;
+    background-color: transparent;
+    cursor: inherit;
+}
+
+element-text {
+    horizontal-align: 0.5;
+    background-color: transparent;
+    text-color: inherit;
+    cursor: inherit;
+}

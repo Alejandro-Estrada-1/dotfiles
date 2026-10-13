@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+# Changes the wallpaper of the active theme, on the desktop and the lock screen.
+# Each theme remembers its own choice in ~/.config/dotfiles/wallpapers (outside
+# the repo, one "theme=path" per line); without one it uses the theme's default.
+#
+# Usage: dots-wallpaper              picker with thumbnails (Alt + W)
+#        dots-wallpaper <image>      use that image for the active theme
+#        dots-wallpaper --reset      go back to the theme's default wallpaper
+#        dots-wallpaper --folder     print the folder for your own wallpapers
+set -euo pipefail
+
+REPO="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+# shellcheck source=lib/common.sh
+source "$REPO/scripts/lib/common.sh"
+
+OVERRIDES="$DOTS_CONFIG/dotfiles/wallpapers"
+THEME="$(cat "$DOTS_STATE/theme" 2>/dev/null || echo catppuccin/green)"
+THUMBS="${XDG_CACHE_HOME:-$HOME/.cache}/dots-wallpaper"
+
+# Your own wallpapers: a "Wallpapers" folder inside the pictures folder of the
+# system language (~/Imágenes/Wallpapers, ~/Pictures/Wallpapers, ...)
+pictures="$(xdg-user-dir PICTURES 2>/dev/null || true)"
+[[ -n "$pictures" && "$pictures" != "$HOME" ]] || pictures="$HOME/Pictures"
+USER_DIR="$pictures/Wallpapers"
+
+die() { echo "dots-wallpaper: $*" >&2; exit 1; }
+
+# Saves (or removes, with an empty path) the choice for the active theme and
+# applies the theme again: wallpaper, lock screen and Hyprland in one go.
+save_choice() {
+    mkdir -p "$(dirname "$OVERRIDES")"
+    touch "$OVERRIDES"
+    local tmp
+    tmp=$(mktemp "$OVERRIDES.XXXXXX")
+    awk -F= -v t="$THEME" '$1 != t' "$OVERRIDES" >"$tmp"
+    [[ -n "$1" ]] && printf '%s=%s\n' "$THEME" "$1" >>"$tmp"
+    mv -f "$tmp" "$OVERRIDES"
+    "$REPO/scripts/dots-apply-theme" --current >/dev/null
+    echo "$(L "Wallpaper for" "Fondo de") $THEME: ${1:-$(L "theme default" "el del tema")}"
+}
+
+check_image() {
+    local path=$1
+    [[ -f "$path" && -r "$path" ]] || die "$(L "file not found" "no existe el archivo"): $path"
+    [[ "$(file -b --mime-type "$path")" == image/* ]] || die "$(L "not an image" "no es una imagen"): $path"
+    # The path ends up inside quoted strings in the generated configs
+    [[ "$path" != *[\"\'$'\n']* ]] || die "$(L "the path cannot contain quotes" "la ruta no puede contener comillas"): $path"
+}
+
+thumbnail() { # image -> cached 320x200 thumbnail (falls back to the image)
+    local img=$1 thumb
+    thumb="$THUMBS/$(printf '%s %s' "$img" "$(stat -c %Y "$img")" | sha1sum | cut -c1-40).jpg"
+    if [[ ! -f "$thumb" ]] && command -v magick >/dev/null; then
+        magick "${img}[0]" -auto-orient -thumbnail 320x200^ -gravity center -extent 320x200 \
+            -quality 85 "$thumb" 2>/dev/null || true
+    fi
+    [[ -f "$thumb" ]] && printf '%s' "$thumb" || printf '%s' "$img"
+}
+
+pick() {
+    mkdir -p "$USER_DIR" "$THUMBS"
+    if pgrep -x rofi >/dev/null; then pkill -x rofi; exit 0; fi
+
+    local -a paths=() labels=()
+    if grep -q "^$THEME=" "$OVERRIDES" 2>/dev/null; then
+        paths+=("--reset")
+        labels+=("$(L "Theme default" "Fondo del tema")")
+    fi
+    # Your own images first, then the ones that come with the repo
+    local dir
+    for dir in "$USER_DIR" "$REPO/wallpapers"; do
+        while IFS= read -r -d '' img; do
+            paths+=("$img"); labels+=("$(basename "${img%.*}")")
+        done < <(find "$dir" -maxdepth 2 -type f \
+                      \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) -print0 | sort -z)
+    done
+
+    # Thumbnails are cached, so only the first run per image takes a moment
+    local default_img
+    default_img="$REPO/wallpapers/$(sed -n 's/^WALLPAPER="\(.*\)"$/\1/p' "$REPO/themes/$THEME.theme")"
+    local i icon choice
+    choice=$(
+        for i in "${!paths[@]}"; do
+            if [[ "${paths[i]}" == "--reset" ]]; then icon=$(thumbnail "$default_img"); else icon=$(thumbnail "${paths[i]}"); fi
+            printf '%s\0icon\x1f%s\n' "${labels[i]}" "$icon"
+        done | rofi -dmenu -i -show-icons -format i -p "$(L "WALLPAPER" "FONDO")" \
+                    -mesg "$(L "Your own images go in" "Tus imágenes van en") ${USER_DIR/#$HOME/\~}" \
+                    -theme "$REPO/scripts/rofi/wallpaper.rasi"
+    ) || exit 0
+    [[ -z "$choice" ]] && exit 0
+
+    if [[ "${paths[choice]}" == "--reset" ]]; then
+        save_choice ""
+    else
+        save_choice "${paths[choice]}"
+    fi
+}
+
+case "${1:-}" in
+    "") pick ;;
+    --reset) save_choice "" ;;
+    --folder) mkdir -p "$USER_DIR"; echo "$USER_DIR" ;;
+    -h|--help) sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//' ;;
+    -*) die "$(L "unknown option" "opción desconocida"): $1" ;;
+    *) img=$(realpath -m -- "$1"); check_image "$img"; save_choice "$img" ;;
+esac

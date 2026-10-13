@@ -168,6 +168,20 @@ FOLDERS="cat-mocha-green"
 
 `dots-apply-theme` fills the templates in `themes/templates/` with those values and writes the `current-theme.*` files that each program reads. The generated files are listed in `.gitignore`. Each program's own configuration (keybinds, bar modules, etc.) exists **only once**.
 
+### Changing the wallpaper
+
+Each theme comes with a wallpaper, but you can pick another one at any time with `Alt + W`: a grid of thumbnails with your own images first and the ones in the repo after. The choice applies to the desktop and the lock screen at once, and each theme remembers its own, so you can give the blue theme a different blue wallpaper without touching the others.
+
+Put your own images in the `Wallpapers` folder inside your pictures folder (for example `~/Pictures/Wallpapers` or `~/Imágenes/Wallpapers`; `dots-wallpaper --folder` prints it). From a terminal:
+
+```sh
+dots-wallpaper ~/Downloads/my-wallpaper.jpg   # use this image for the active theme
+dots-wallpaper --reset                        # back to the theme's wallpaper
+```
+
+> [!NOTE]
+> The choices are saved in `~/.config/dotfiles/wallpapers`, outside the repo, so every user keeps their own. If a chosen image is deleted, the theme goes back to its default wallpaper.
+
 ### Creating a theme
 
 1. Put your wallpaper in `wallpapers/` and, optionally, a logo in `config/fastfetch/logos/`.
@@ -203,6 +217,7 @@ The **KB** button on the bar shows the full list. It is read from the live confi
 | `Alt + X` | Application menu |
 | `Alt + Z` | Power menu |
 | `Alt + C` | Change theme |
+| `Alt + W` | Change wallpaper |
 | `Alt + Q` | Close window |
 | `Alt + F` | Toggle floating |
 | `Alt + S` | Toggle split |
@@ -270,7 +285,7 @@ When the external monitor is plugged in after logging in, it gets the theme's wa
 │   ├── catppuccin/*.theme
 │   ├── misc/*.theme
 │   └── templates/         source of the current-theme.* files
-├── scripts/               dots-theme, dots-apply-theme, dots-keybinds, dots-powermenu, dots-update, dots-cava, dots-media
+├── scripts/               dots-theme, dots-apply-theme, dots-keybinds, dots-powermenu, dots-update, dots-cava, dots-media, dots-wallpaper
 │   └── lib/common.sh      shared helpers (settings, language)
 ├── wallpapers/
 └── assets/                hypr-dots-* GTK themes and cursors

@@ -7,6 +7,7 @@ local bin = os.getenv("HOME") .. "/.local/bin"
 
 return {
     theme_picker = bin .. "/dots-theme",
+    wallpaper    = bin .. "/dots-wallpaper",
     keybinds     = bin .. "/dots-keybinds",
     power_menu   = bin .. "/dots-powermenu",
     media_panel  = bin .. "/dots-media",

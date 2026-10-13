@@ -168,6 +168,20 @@ FOLDERS="cat-mocha-green"
 
 `dots-apply-theme` rellena las plantillas de `themes/templates/` con esos valores y genera los archivos `current-theme.*` que lee cada programa. Los archivos generados están en `.gitignore`. La configuración de cada programa (atajos, módulos de la barra, etc.) existe **una sola vez**.
 
+### Cambiar el fondo de pantalla
+
+Cada tema trae un fondo, pero puedes elegir otro cuando quieras con `Alt + W`: una cuadrícula de miniaturas con tus imágenes primero y las del repo después. El cambio se aplica a la vez al escritorio y a la pantalla de bloqueo, y cada tema recuerda el suyo, así que puedes darle al tema blue otro fondo azul sin tocar los demás.
+
+Pon tus imágenes en la carpeta `Wallpapers` dentro de tu carpeta de imágenes (por ejemplo `~/Imágenes/Wallpapers` o `~/Pictures/Wallpapers`; `dots-wallpaper --folder` te la muestra). Desde la terminal:
+
+```sh
+dots-wallpaper ~/Descargas/mi-fondo.jpg   # usar esta imagen en el tema activo
+dots-wallpaper --reset                    # volver al fondo del tema
+```
+
+> [!NOTE]
+> Las elecciones se guardan en `~/.config/dotfiles/wallpapers`, fuera del repo, así que cada usuario conserva las suyas. Si borras una imagen elegida, el tema vuelve a su fondo predeterminado.
+
 ### Crear un tema
 
 1. Pon tu fondo en `wallpapers/` y, si quieres, un logo en `config/fastfetch/logos/`.
@@ -203,6 +217,7 @@ El botón **KB** de la barra muestra la lista completa. Se lee de la configuraci
 | `Alt + X` | Menú de aplicaciones |
 | `Alt + Z` | Menú de energía |
 | `Alt + C` | Cambiar tema |
+| `Alt + W` | Cambiar fondo de pantalla |
 | `Alt + Q` | Cerrar ventana |
 | `Alt + F` | Ventana flotante |
 | `Alt + S` | Alternar división |
@@ -270,7 +285,7 @@ Si conectas el monitor externo con la sesión ya iniciada, recibe el fondo del t
 │   ├── catppuccin/*.theme
 │   ├── misc/*.theme
 │   └── templates/         de aquí salen los archivos current-theme.*
-├── scripts/               dots-theme, dots-apply-theme, dots-keybinds, dots-powermenu, dots-update, dots-cava, dots-media
+├── scripts/               dots-theme, dots-apply-theme, dots-keybinds, dots-powermenu, dots-update, dots-cava, dots-media, dots-wallpaper
 │   └── lib/common.sh      funciones compartidas (preferencias, idioma)
 ├── wallpapers/
 └── assets/                temas GTK y cursores hypr-dots-*

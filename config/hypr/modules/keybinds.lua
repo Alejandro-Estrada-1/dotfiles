@@ -19,6 +19,7 @@ local function run(cmd) return dsp.exec_cmd(cmd) end
 
 -- Programs
 bind("ALT + C",        run(p.theme_picker), L("Change theme", "Cambiar tema"))
+bind("ALT + W",        run(p.wallpaper),    L("Change wallpaper", "Cambiar fondo de pantalla"))
 bind("ALT + Return",   run(p.terminal),     L("Open terminal", "Abrir terminal"))
 bind("SUPER + E",      run(p.file_manager), L("Open file manager", "Abrir gestor de archivos"))
 bind("ALT + X",        run(p.app_menu),     L("Open application menu", "Abrir menú de aplicaciones"))
