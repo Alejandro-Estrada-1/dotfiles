@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Volume, mute and brightness keys (bound in config/hypr/modules/keybinds.lua).
+# Some laptops send these keys twice, from the keyboard and from the vendor's
+# hotkey driver (Huawei WMI, for example), a few milliseconds apart: mute then
+# toggled twice and seemed to do nothing, and volume moved 10% instead of 5%.
+# A press that arrives less than 50 ms after the previous one of the same key is
+# ignored; real presses are always further apart.
+#
+# Usage: dots-mediakey volume-up | volume-down | mute | mic-mute | brightness-up | brightness-down
+set -euo pipefail
+
+action=${1:-}
+case "$action" in
+    volume-up)       cmd=(wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+) ;;
+    volume-down)     cmd=(wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-) ;;
+    mute)            cmd=(wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle) ;;
+    mic-mute)        cmd=(wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle) ;;
+    brightness-up)   cmd=(brightnessctl -q s 2%+) ;;
+    brightness-down) cmd=(brightnessctl -q s 2%-) ;;
+    *) sed -n '9p' "$0" | sed 's/^# //' >&2; exit 1 ;;
+esac
+
+dir="${XDG_RUNTIME_DIR:-/tmp}/dots-mediakey"
+mkdir -p "$dir"
+stamp="$dir/$action"
+
+# The duplicate starts at almost the same time: the lock makes it wait until
+# the first press is done, and then it sees the fresh timestamp
+exec 9>"$stamp.lock"
+flock 9
+now=$(date +%s%N)
+last=$(cat "$stamp" 2>/dev/null || echo 0)
+(( now - last < 50000000 )) && exit 0
+echo "$now" >"$stamp"
+"${cmd[@]}"

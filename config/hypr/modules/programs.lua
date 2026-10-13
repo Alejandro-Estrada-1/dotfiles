@@ -11,6 +11,7 @@ return {
     keybinds     = bin .. "/dots-keybinds",
     power_menu   = bin .. "/dots-powermenu",
     media_panel  = bin .. "/dots-media",
+    media_key    = bin .. "/dots-mediakey",
     notifications = "swaync-client -t -sw",
     terminal     = "kitty",
     file_manager = "thunar",

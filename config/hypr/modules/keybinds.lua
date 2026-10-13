@@ -68,14 +68,17 @@ bind("SUPER + mouse:273", dsp.window.resize(), L("Resize window", "Redimensionar
 
 -- Media keys. They work on the lock screen and do not repeat when held: with the
 -- short key repeat delay (input.lua) a normal press sometimes counted twice.
--- Each press changes the volume by exactly 5% (up to 150%) and brightness by 2%.
+-- dots-mediakey also ignores the duplicate press some laptops send from their
+-- hotkey driver. Each press changes the volume by exactly 5% (up to 150%) and
+-- brightness by 2%.
 local locked = { locked = true }
-bind("XF86AudioRaiseVolume",  run("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"), L("Volume up", "Subir volumen"),             locked)
-bind("XF86AudioLowerVolume",  run("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),        L("Volume down", "Bajar volumen"),           locked)
-bind("XF86AudioMute",         run("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),       L("Mute audio", "Silenciar audio"),          locked)
-bind("XF86AudioMicMute",      run("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),     L("Mute microphone", "Silenciar micrófono"), locked)
-bind("XF86MonBrightnessUp",   run("brightnessctl s 2%+"),                              L("Brightness up", "Subir brillo"),          locked)
-bind("XF86MonBrightnessDown", run("brightnessctl s 2%-"),                              L("Brightness down", "Bajar brillo"),        locked)
+local function key(action) return run(p.media_key .. " " .. action) end
+bind("XF86AudioRaiseVolume",  key("volume-up"),       L("Volume up", "Subir volumen"),             locked)
+bind("XF86AudioLowerVolume",  key("volume-down"),     L("Volume down", "Bajar volumen"),           locked)
+bind("XF86AudioMute",         key("mute"),            L("Mute audio", "Silenciar audio"),          locked)
+bind("XF86AudioMicMute",      key("mic-mute"),        L("Mute microphone", "Silenciar micrófono"), locked)
+bind("XF86MonBrightnessUp",   key("brightness-up"),   L("Brightness up", "Subir brillo"),          locked)
+bind("XF86MonBrightnessDown", key("brightness-down"), L("Brightness down", "Bajar brillo"),        locked)
 
 bind("XF86AudioNext",  run("playerctl next"),       L("Next track", "Siguiente canción"),         locked)
 bind("XF86AudioPause", run("playerctl play-pause"), L("Play / pause", "Pausar / reproducir"),     locked)
