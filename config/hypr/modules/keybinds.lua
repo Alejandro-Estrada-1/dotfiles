@@ -65,15 +65,16 @@ bind("SUPER + SHIFT + period", dsp.window.move({ monitor = "right" }), L("Move w
 bind("SUPER + mouse:272", dsp.window.drag(),   L("Move window", "Mover ventana"),            { mouse = true })
 bind("SUPER + mouse:273", dsp.window.resize(), L("Resize window", "Redimensionar ventana"), { mouse = true })
 
--- Media keys (they work on the lock screen; volume and brightness repeat when held)
-local repeating = { locked = true, repeating = true }
-local locked    = { locked = true }
-bind("XF86AudioRaiseVolume",  run("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"),    L("Volume up", "Subir volumen"),               repeating)
-bind("XF86AudioLowerVolume",  run("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),    L("Volume down", "Bajar volumen"),             repeating)
-bind("XF86AudioMute",         run("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),   L("Mute audio", "Silenciar audio"),            repeating)
-bind("XF86AudioMicMute",      run("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), L("Mute microphone", "Silenciar micrófono"),   repeating)
-bind("XF86MonBrightnessUp",   run("brightnessctl s 2%+"),                          L("Brightness up", "Subir brillo"),            repeating)
-bind("XF86MonBrightnessDown", run("brightnessctl s 2%-"),                          L("Brightness down", "Bajar brillo"),          repeating)
+-- Media keys. They work on the lock screen and do not repeat when held: with the
+-- short key repeat delay (input.lua) a normal press sometimes counted twice.
+-- Each press changes the volume by exactly 5% (up to 150%) and brightness by 2%.
+local locked = { locked = true }
+bind("XF86AudioRaiseVolume",  run("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"), L("Volume up", "Subir volumen"),             locked)
+bind("XF86AudioLowerVolume",  run("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),        L("Volume down", "Bajar volumen"),           locked)
+bind("XF86AudioMute",         run("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),       L("Mute audio", "Silenciar audio"),          locked)
+bind("XF86AudioMicMute",      run("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),     L("Mute microphone", "Silenciar micrófono"), locked)
+bind("XF86MonBrightnessUp",   run("brightnessctl s 2%+"),                              L("Brightness up", "Subir brillo"),          locked)
+bind("XF86MonBrightnessDown", run("brightnessctl s 2%-"),                              L("Brightness down", "Bajar brillo"),        locked)
 
 bind("XF86AudioNext",  run("playerctl next"),       L("Next track", "Siguiente canción"),         locked)
 bind("XF86AudioPause", run("playerctl play-pause"), L("Play / pause", "Pausar / reproducir"),     locked)
