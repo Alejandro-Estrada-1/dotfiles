@@ -11,11 +11,11 @@ uptime="$(uptime -p | sed -e 's/up //g')"
 # Options (Nerd Font icons)
 shutdown='⏼'
 reboot='󰜉'
-lock=''
-suspend=''
+lock=''
+suspend=''
 logout='󰿅'
-yes=''
-no=''
+yes=''
+no=''
 
 rofi_cmd() {
 	rofi -dmenu \
@@ -44,10 +44,11 @@ run_rofi() {
 	echo -e "$lock\n$suspend\n$logout\n$reboot\n$shutdown" | rofi_cmd
 }
 
-# Asks for confirmation; exits the script unless the answer is "yes"
+# Asks for confirmation; exits the script unless the answer is exactly "yes"
+# (Esc or closing rofi returns an empty answer, which must never confirm)
 run_cmd() {
 	selected="$(confirm_exit)"
-	if [[ "$selected" != "$yes" ]]; then
+	if [[ -z "$selected" || "$selected" != "$yes" ]]; then
 		exit 0
 	fi
 	case $1 in
@@ -62,6 +63,8 @@ run_cmd() {
 }
 
 chosen="$(run_rofi)"
+# Nothing chosen (Esc or click outside): do nothing
+[[ -z "$chosen" ]] && exit 0
 case ${chosen} in
 	"$shutdown")
 		run_cmd --shutdown

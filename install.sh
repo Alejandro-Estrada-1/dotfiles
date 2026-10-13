@@ -194,6 +194,13 @@ step "$(L "Language" "Idioma"): $(L "English" "Español")"
 step "$(L "Keyboard" "Teclado"): $layout${variant:+ ($variant)}${options:+ [$options]}"
 (( KB_UNVERIFIED )) && echo "    $(L "(will be checked after installing the packages)" "(se comprobará después de instalar los paquetes)")"
 
+# sudo without a terminal cannot ask for the password, and every failed attempt
+# counts towards pam_faillock (3 failures lock the account for 10 minutes).
+# "sudo -n" only checks, without counting as a failure.
+can_sudo() { (( DRY_RUN )) || [[ -t 0 ]] || sudo -n true 2>/dev/null; }
+NO_SUDO_MSG=$(L "needs sudo, but there is no terminal to type the password; run ./install.sh from a terminal" \
+                "necesita sudo, pero no hay una terminal donde escribir la contraseña; ejecuta ./install.sh desde una terminal")
+
 read_list() { grep -vE '^\s*(#|$)' "$1" | sed 's/#.*//' | awk '{print $1}'; }
 
 # --- 1. Packages ---
@@ -209,6 +216,7 @@ if (( PACKAGES )); then
         echo "    $(L "all installed" "todos instalados")"
     else
         echo "    $(L "missing" "faltan"): ${todo[*]}"
+        can_sudo || die "pacman $NO_SUDO_MSG"
         run sudo pacman -S --needed "${NOCONFIRM[@]}" "${todo[@]}" ||
             die "$(L "pacman could not install the packages. If it was a download error (slow or unreachable mirror), run ./install.sh again; it continues where it stopped." \
                      "pacman no pudo instalar los paquetes. Si fue un error de descarga (espejo lento o caído), vuelve a ejecutar ./install.sh; continúa donde se quedó.")"
@@ -221,6 +229,7 @@ if (( PACKAGES )); then
         echo "    $(L "all installed" "todos instalados")"
     else
         echo "    $(L "missing" "faltan"): ${todo[*]}"
+        can_sudo || die "AUR $NO_SUDO_MSG"
         helper=""
         for h in paru yay; do command -v "$h" >/dev/null && { helper=$h; break; }; done
         if [[ -z "$helper" ]]; then
@@ -313,7 +322,9 @@ else
     if (( interactive )); then
         read -rp "    $(L "Make zsh your default shell (instead of $login_shell)? [Y/n] " "¿Usar zsh como shell por defecto (en lugar de $login_shell)? [S/n] ")" answer
     fi
-    if [[ ! "$answer" =~ ^[nN] ]]; then
+    if [[ ! "$answer" =~ ^[nN] ]] && ! can_sudo; then
+        warn "chsh $NO_SUDO_MSG"
+    elif [[ ! "$answer" =~ ^[nN] ]]; then
         run sudo chsh -s "$zsh_path" "$USER"
         login_shell=$zsh_path
         echo "    $(L "default shell" "shell por defecto"): $zsh_path"
@@ -344,8 +355,12 @@ fi
 if systemctl list-unit-files bluetooth.service >/dev/null 2>&1 &&
    [[ "$(systemctl is-enabled bluetooth.service 2>/dev/null)" != enabled ]]; then
     step "$(L "Enabling the Bluetooth service" "Activando el servicio de Bluetooth")"
-    run sudo systemctl enable --now bluetooth.service ||
-        warn "$(L "could not enable bluetooth.service (no Bluetooth adapter?)" "no se pudo activar bluetooth.service (¿no hay adaptador Bluetooth?)")"
+    if ! can_sudo; then
+        warn "bluetooth.service $NO_SUDO_MSG"
+    else
+        run sudo systemctl enable --now bluetooth.service ||
+            warn "$(L "could not enable bluetooth.service (no Bluetooth adapter?)" "no se pudo activar bluetooth.service (¿no hay adaptador Bluetooth?)")"
+    fi
 fi
 
 # --- 3. Initial theme ---

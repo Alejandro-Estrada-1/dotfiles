@@ -120,8 +120,28 @@ if command -v gsettings >/dev/null; then
     gsettings set org.gnome.desktop.interface icon-theme Papirus-Dark 2>/dev/null || true
     gsettings set org.gnome.desktop.interface cursor-theme "$CURSOR" 2>/dev/null || true
 fi
+# Papirus folder colors. papirus-folders runs sudo by itself when the icon
+# theme is not writable. Without a terminal (Alt + C) that sudo cannot ask for
+# the password and every attempt counts as a failed login: pam_faillock locks
+# the account after 3. So it only runs when no password is needed or when
+# there is a terminal to type it in.
+papirus_writable() {
+    local d
+    for d in "${XDG_DATA_HOME:-$HOME/.local/share}/icons/Papirus" "$HOME/.icons/Papirus" \
+             /usr/local/share/icons/Papirus /usr/share/icons/Papirus; do
+        [[ -f "$d/index.theme" ]] || continue
+        [[ -w "$d/48x48/places/folder.svg" ]]
+        return
+    done
+    return 1
+}
 if [[ -n "$FOLDERS" ]] && command -v papirus-folders >/dev/null; then
-    papirus-folders -C "$FOLDERS" >/dev/null 2>&1 || true
+    if papirus_writable; then
+        papirus-folders -C "$FOLDERS" >/dev/null 2>&1 || true
+    elif [[ -t 0 && -t 1 ]]; then
+        echo "$(L "The folder color needs administrator rights:" "El color de las carpetas requiere permisos de administrador:")"
+        sudo papirus-folders -C "$FOLDERS" >/dev/null || true
+    fi
 fi
 
 # --- Apply live (only inside Hyprland) ---
