@@ -116,6 +116,18 @@ for f in "$CFG/gtk-3.0/settings.ini" "$CFG/gtk-4.0/settings.ini"; do
     set_ini "$f" gtk-cursor-theme-name "$CURSOR"
     set_ini "$f" gtk-cursor-theme-size 24
 done
+# GTK 4 apps read ~/.config/gtk-4.0/gtk.css, which nwg-look sets as links to one
+# theme; point them to the active theme's GTK 4 files (only when they are links)
+gtk4_src="${XDG_DATA_HOME:-$HOME/.local/share}/themes/$GTK/gtk-4.0"
+if [[ -d "$gtk4_src" ]]; then
+    mkdir -p "$CFG/gtk-4.0"
+    for f in gtk.css gtk-dark.css assets; do
+        dst="$CFG/gtk-4.0/$f"
+        if [[ -e "$gtk4_src/$f" ]] && { [[ -L "$dst" ]] || [[ ! -e "$dst" ]]; }; then
+            ln -sfn "$gtk4_src/$f" "$dst"
+        fi
+    done
+fi
 if command -v gsettings >/dev/null; then
     gsettings set org.gnome.desktop.interface gtk-theme "$GTK" 2>/dev/null || true
     gsettings set org.gnome.desktop.interface icon-theme Papirus-Dark 2>/dev/null || true

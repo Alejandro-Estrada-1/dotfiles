@@ -3,8 +3,22 @@
    The translucent background is blurred by Hyprland (layer rule in modules/rules.lua). */
 @import url("current-theme.css");
 
-window.dots-media {
+/* The window covers the screen (to close on a click outside); only the panel
+   is visible. GTK themes paint ".background", so reset it explicitly. */
+window.dots-media,
+window.dots-media.background {
   background: transparent;
+  box-shadow: none;
+}
+
+/* GTK themes style buttons and progress bars too: start from a clean slate */
+.panel button,
+.panel progressbar trough,
+.panel progressbar progress {
+  background-image: none;
+  border: none;
+  box-shadow: none;
+  text-shadow: none;
 }
 
 .panel {

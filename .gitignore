@@ -11,3 +11,7 @@ config/dots-media/current-theme.css
 
 # cava copies its default shaders here on start
 config/cava/shaders/
+
+# Stub that Hyprland writes when a hyprlang session finds no hyprland.conf
+# (hyprland.lua takes precedence, so it is never used)
+config/hypr/hyprland.conf

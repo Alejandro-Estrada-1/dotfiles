@@ -94,8 +94,10 @@ class MediaPanel(Gtk.Application):
         if os.path.exists(path):
             provider = Gtk.CssProvider()
             provider.load_from_path(path)
+            # Above ~/.config/gtk-4.0/gtk.css (USER priority): GTK themes paint every
+            # window background, which would cover the whole screen behind the panel
             Gtk.StyleContext.add_provider_for_display(
-                Gdk.Display.get_default(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+                Gdk.Display.get_default(), provider, Gtk.STYLE_PROVIDER_PRIORITY_USER + 1)
 
     def build_window(self):
         win = Gtk.ApplicationWindow(application=self)
