@@ -38,12 +38,32 @@ waves = 1
 noise_reduction = 77
 EOF
 
-# "0;3;7;..." -> "▁▄█..."
-script="s/;//g;"
+# "0;3;7;..." -> "▁▄█..."; anything that is not a frame (cava's error
+# messages, terminal escapes) is dropped so the bar never shows stray text
+script="/^[0-9;]*$/!d;s/;//g;"
 for i in {0..7}; do script+="s/$i/${bars:$i:1}/g;"; done
+flat="${bars:0:1}${bars:0:1}${bars:0:1}${bars:0:1}${bars:0:1}${bars:0:1}${bars:0:1}${bars:0:1}"
 
-# sed replaces this shell, so when Waybar stops the module cava gets a broken
-# pipe on its next frame and exits too (no leftover processes). Waybar ignores
-# SIGPIPE and its children inherit that, so cava gets the default action back
-# through env (bash itself cannot reset a signal ignored on entry).
-exec sed -u "$script" < <(env --default-signal=PIPE cava -p "$config")
+audio_ready() {
+    if command -v pactl >/dev/null; then pactl info >/dev/null 2>&1
+    else [[ -S "${XDG_RUNTIME_DIR:-/run/user/$UID}/pulse/native" ]]
+    fi
+}
+
+# Waybar starts before the audio server at login, and cava exits if it cannot
+# connect (or when PipeWire restarts). So wait for audio, run cava, and start
+# it again whenever it stops. The echo doubles as a check that Waybar is still
+# reading: once it stops the module the pipe is closed, the write fails and
+# the loop ends. Waybar ignores SIGPIPE and its children inherit that, so cava
+# and sed get the default action back through env (bash itself cannot reset a
+# signal ignored on entry): they exit on the first frame Waybar no longer reads.
+while :; do
+    until audio_ready; do
+        echo "$flat" 2>/dev/null || exit 0
+        sleep 2
+    done
+    env --default-signal=PIPE cava -p "$config" 2>/dev/null |
+        env --default-signal=PIPE sed -u "$script" || true
+    echo "$flat" 2>/dev/null || exit 0
+    sleep 2
+done

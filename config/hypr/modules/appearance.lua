@@ -28,7 +28,7 @@ return function(theme)
             shadow = {
                 enabled        = true,
                 range          = 25,
-                render_power   = 1000,
+                render_power   = 4,     -- 1 to 4: how fast the shadow fades
                 color          = shadow,
                 color_inactive = "rgba(00000000)",
             },
