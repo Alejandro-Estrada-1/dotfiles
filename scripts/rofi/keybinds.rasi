@@ -1,5 +1,5 @@
 * {
-    width: 600;
+    width: 800;
     font: "JetBrainsMono Nerd Font 14";
 }
 @import                          "~/.config/rofi/current-theme.rasi"
